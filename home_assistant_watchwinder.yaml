@@ -1,0 +1,781 @@
+group:
+  grp_watchwinder_power:
+    name: Watch Winder Power
+    entities:
+      - switch.watchwinder_1
+      - switch.watchwinder_2
+      - switch.watchwinder_3
+      - switch.watchwinder_4
+      - switch.watchwinder_5
+      - switch.watchwinder_6
+  grp_watchwinder_display:
+    name: Watch Winder OLEDs
+    entities:
+      - switch.watchwinder_1_display
+      - switch.watchwinder_2_display
+      - switch.watchwinder_3_display
+      - switch.watchwinder_4_display
+      - switch.watchwinder_5_display
+      - switch.watchwinder_6_display
+  grp_watchwinder_keep_it_wound:
+    name: Mantieni Carico
+    entities:
+      - input_boolean.keep_it_wound_1
+      - input_boolean.keep_it_wound_2
+      - input_boolean.keep_it_wound_3
+      - input_boolean.keep_it_wound_4
+      - input_boolean.keep_it_wound_5
+      - input_boolean.keep_it_wound_6
+            
+sensor:
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_1/INFO'
+    name: 'Last Seen Watchwinder 1'
+    value_template: '{{ value_json.Time }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_2/INFO'
+    name: 'Last Seen Watchwinder 2'
+    value_template: '{{ value_json.Time }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_3/INFO'
+    name: 'Last Seen Watchwinder 3'
+    value_template: '{{ value_json.Time }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_4/INFO'
+    name: 'Last Seen Watchwinder 4'
+    value_template: '{{ value_json.Time }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_5/INFO'
+    name: 'Last Seen Watchwinder 5'
+    value_template: '{{ value_json.Time }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_6/INFO'
+    name: 'Last Seen Watchwinder 6'
+    value_template: '{{ value_json.Time }}'  
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_1/INFO'
+    name: 'Rotazioni effettuate 1'
+    value_template: '{{ value_json.rotation_done }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_2/INFO'
+    name: 'Rotazioni effettuate 2'
+    value_template: '{{ value_json.rotation_done }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_3/INFO'
+    name: 'Rotazioni effettuate 3'
+    value_template: '{{ value_json.rotation_done }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_4/INFO'
+    name: 'Rotazioni effettuate 4'
+    value_template: '{{ value_json.rotation_done }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_5/INFO'
+    name: 'Rotazioni effettuate 5'
+    value_template: '{{ value_json.rotation_done }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_6/INFO'
+    name: 'Rotazioni effettuate 6'
+    value_template: '{{ value_json.rotation_done }}'      
+    
+input_boolean:
+  keep_it_wound_1:
+    name: Mantieni carico 1
+  keep_it_wound_2:
+    name: Mantieni carico 2
+  keep_it_wound_3:
+    name: Mantieni carico 3
+  keep_it_wound_4:
+    name: Mantieni carico 4
+  keep_it_wound_5:
+    name: Mantieni carico 5
+  keep_it_wound_6:
+    name: Mantieni carico 6    
+    
+input_select:
+  marcia_watchwinder:
+    name: Marcia
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia1:
+    name: Marcia 1
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia2:
+    name: Marcia 2
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia3:
+    name: Marcia 3
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia4:
+    name: Marcia 4
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia5:
+    name: Marcia 5
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew
+  marcia6:
+    name: Marcia 6
+    options:
+      - Orario
+      - Antiorario
+      - Misto
+    initial: Misto
+    icon: mdi:autorenew    
+    
+input_number:
+  roration_speed_watchwinder:
+    name: Durata rotazione
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_watchwinder:
+    name: Numero rotazioni giornaliere
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_1:
+    name: Durata rotazione 1
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_1:
+    name: Numero rotazioni giornaliere 1
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_2:
+    name: Durata rotazione 2
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_2:
+    name: Numero rotazioni giornaliere 2
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_3:
+    name: Durata rotazione 3
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_3:
+    name: Numero rotazioni giornaliere 3
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_4:
+    name: Durata rotazione 4
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_4:
+    name: Numero rotazioni giornaliere 4
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_5:
+    name: Durata rotazione 5
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_5:
+    name: Numero rotazioni giornaliere 5
+    initial: 300
+    min: 50
+    max: 900
+    step: 50
+  roration_speed_6:
+    name: Durata rotazione 6
+    initial: 2500
+    min: 900
+    max: 2500
+    step: 100
+  rotation_number_6:
+    name: Numero rotazioni giornaliere 6
+    initial: 300
+    min: 50
+    max: 900
+    step: 50    
+    
+switch:
+  - platform: mqtt
+    name: "Watchwinder 1"
+    command_topic: "cmnd/watchwinder_1/POWER"
+    state_topic: "stat/watchwinder_1/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 2"
+    command_topic: "cmnd/watchwinder_2/POWER"
+    state_topic: "stat/watchwinder_2/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 3"
+    command_topic: "cmnd/watchwinder_3/POWER"
+    state_topic: "stat/watchwinder_3/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 4"
+    command_topic: "cmnd/watchwinder_4/POWER"
+    state_topic: "stat/watchwinder_4/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 5"
+    command_topic: "cmnd/watchwinder_5/POWER"
+    state_topic: "stat/watchwinder_5/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 6"
+    command_topic: "cmnd/watchwinder_6/POWER"
+    state_topic: "stat/watchwinder_6/POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"    
+  - platform: mqtt
+    name: "Watchwinder 1 display"
+    command_topic: "cmnd/watchwinder_1/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_1/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 2 display"
+    command_topic: "cmnd/watchwinder_2/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_2/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 3 display"
+    command_topic: "cmnd/watchwinder_3/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_3/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 4 display"
+    command_topic: "cmnd/watchwinder_4/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_4/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 5 display"
+    command_topic: "cmnd/watchwinder_5/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_5/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"
+  - platform: mqtt
+    name: "Watchwinder 6 display"
+    command_topic: "cmnd/watchwinder_6/DISPLAY_POWER"
+    state_topic: "stat/watchwinder_6/DISPLAY_POWER"
+    qos: 1
+    retain: true
+    payload_on: "ON"
+    payload_off: "OFF"    
+  - platform: mqtt
+    name: "rebootwatchwinder"
+    command_topic: "cmnd/watchwinder/reboot"
+    state_topic: "stat/watchwinder/reboot"
+    qos: 1
+    retain: false
+    payload_on: "ON"
+    payload_off: "OFF" 
+  - platform: mqtt
+    name: "showlastpage"
+    command_topic: "cmnd/watchwinder/OLEDINFO"
+    qos: 0
+    retain: false
+    payload_on: "ON"
+    payload_off: "OFF"     
+
+automation:
+  - id: '1566387252088'
+    alias: Sync Watch Winder
+    trigger:
+    - entity_id: input_number.roration_speed_watchwinder
+      platform: state
+    - entity_id: input_number.rotation_number_watchwinder
+      platform: state
+    - entity_id: input_select.marcia_watchwinder
+      platform: state
+    - entity_id: switch.watchwinder
+      platform: state
+    condition:
+    action:
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_1
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_2
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_3
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_4
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_5
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.rotation_number_6
+        value: "{{ states.input_number.rotation_number_watchwinder.state }}"  
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_1
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_2
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_3
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_4
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_5
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_number.set_value
+      data_template:
+        entity_id: input_number.roration_speed_6
+        value: "{{ states.input_number.roration_speed_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia1
+        option: "{{ states.input_select.marcia_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia2
+        option: "{{ states.input_select.marcia_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia3
+        option: "{{ states.input_select.marcia_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia4
+        option: "{{ states.input_select.marcia_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia5
+        option: "{{ states.input_select.marcia_watchwinder.state }}"
+    - service: input_select.select_option
+      data_template:
+        entity_id: input_select.marcia6
+        option: "{{ states.input_select.marcia_watchwinder.state }}"        
+  
+  - id: '1548796542057'
+    alias: watchwinder_settings_1
+    trigger:
+    - entity_id: input_select.marcia1
+      platform: state
+    - entity_id: input_number.roration_speed_1
+      platform: state
+    - entity_id: input_number.rotation_number_1
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_1
+      platform: state      
+    - platform: time_pattern
+      seconds: '/300'      
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_1/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia1.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_1.state}}","rotation_speed":"{{states.input_number.roration_speed_1.state}}","rotation_number":"{{states.input_number.rotation_number_1.state}}"}'
+  - id: '1548796542060'
+    alias: watchwinder_settings_2
+    trigger:
+    - entity_id: input_select.marcia2
+      platform: state
+    - entity_id: input_number.roration_speed_2
+      platform: state
+    - entity_id: input_number.rotation_number_2
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_2
+      platform: state        
+    - platform: time_pattern
+      seconds: '/300'
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_2/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia2.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_2.state}}","rotation_speed":"{{states.input_number.roration_speed_2.state}}","rotation_number":"{{states.input_number.rotation_number_2.state}}"}'
+  - id: '1548796542061'
+    alias: watchwinder_settings_3
+    trigger:
+    - entity_id: input_select.marcia3
+      platform: state
+    - entity_id: input_number.roration_speed_3
+      platform: state
+    - entity_id: input_number.rotation_number_3
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_3
+      platform: state        
+    - platform: time_pattern
+      seconds: '/300'      
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_3/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia3.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_3.state}}","rotation_speed":"{{states.input_number.roration_speed_3.state}}","rotation_number":"{{states.input_number.rotation_number_3.state}}"}'
+  - id: '1548796542062'
+    alias: watchwinder_settings_4
+    trigger:
+    - entity_id: input_select.marcia4
+      platform: state
+    - entity_id: input_number.roration_speed_4
+      platform: state
+    - entity_id: input_number.rotation_number_4
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_4
+      platform: state        
+    - platform: time_pattern
+      seconds: '/300'      
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_4/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia4.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_4.state}}","rotation_speed":"{{states.input_number.roration_speed_4.state}}","rotation_number":"{{states.input_number.rotation_number_4.state}}"}'
+  - id: '1548796542063'
+    alias: watchwinder_settings_5
+    trigger:
+    - entity_id: input_select.marcia5
+      platform: state
+    - entity_id: input_number.roration_speed_5
+      platform: state
+    - entity_id: input_number.rotation_number_5
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_5
+      platform: state        
+    - platform: time_pattern
+      seconds: '/300'      
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_5/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia5.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_5.state}}","rotation_speed":"{{states.input_number.roration_speed_5.state}}","rotation_number":"{{states.input_number.rotation_number_5.state}}"}'
+  - id: '1548796542064'
+    alias: watchwinder_settings_6
+    trigger:
+    - entity_id: input_select.marcia6
+      platform: state
+    - entity_id: input_number.roration_speed_6
+      platform: state
+    - entity_id: input_number.rotation_number_6
+      platform: state
+    - entity_id: input_boolean.keep_it_wound_6
+      platform: state        
+    - platform: time_pattern
+      seconds: '/300'      
+    condition:
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "cmnd/watchwinder_6/SETTINGS"
+        retain: "false"
+        payload: '{"orientation":"{{states.input_select.marcia6.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_6.state}}","rotation_speed":"{{states.input_number.roration_speed_6.state}}","rotation_number":"{{states.input_number.rotation_number_6.state}}"}'
+  - id: '1566422132712'
+    alias: Mantieni Carico 1
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_1
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_1
+      service: switch.turn_on
+  - id: '1566422132713'
+    alias: Mantieni Carico 2
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_2
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_2
+      service: switch.turn_on
+  - id: '1566422132714'
+    alias: Mantieni Carico 3
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_3
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_3
+      service: switch.turn_on
+  - id: '1566422132715'
+    alias: Mantieni Carico 4
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_4
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_4
+      service: switch.turn_on
+  - id: '1566422132716'
+    alias: Mantieni Carico 5
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_5
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_5
+      service: switch.turn_on
+  - id: '1566422132717'
+    alias: Mantieni Carico 6
+    trigger:
+    - at: '20:00:00'
+      platform: time
+    condition:
+      condition: and
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_boolean.keep_it_wound_6
+              state: 'on'
+            - condition: template
+              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+    action:
+    - data:
+        entity_id: switch.watchwinder_6
+      service: switch.turn_on
+  - id: '1598649874581'      
+    alias: Watchwinder Alive 1
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_1')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 1 ha smesso di rispondere!"
+      service: notify.telegram_notifier  
+  - id: '1598649874582'      
+    alias: Watchwinder Alive 2
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_2')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 2 ha smesso di rispondere!"
+      service: notify.telegram_notifier  
+  - id: '1598649874583'      
+    alias: Watchwinder Alive 3
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_3')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 3 ha smesso di rispondere!"
+      service: notify.telegram_notifier  
+  - id: '1598649874584'      
+    alias: Watchwinder Alive 4
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_4')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 4 ha smesso di rispondere!"
+      service: notify.telegram_notifier  
+  - id: '1598649874585'      
+    alias: Watchwinder Alive 5
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_5')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 5 ha smesso di rispondere!"
+      service: notify.telegram_notifier  
+  - id: '1598649874586'      
+    alias: Watchwinder Alive 6
+    trigger:
+      platform: time_pattern
+      seconds: '/60'
+    condition:
+      condition: template
+      value_template: "{{ not (as_timestamp(now()) < (as_timestamp(states('sensor.last_seen_watchwinder_6')) + 60)) }}"
+    action:
+    - data:
+        message: "Watchwinder 6 ha smesso di rispondere!"
+      service: notify.telegram_notifier        
+        
+  - id: '15651419131870'
+    alias: WatchwinderMotionOn
+    trigger:
+    - entity_id: binary_sensor.sr501pir
+      from: 'off'
+      platform: state
+      to: 'on'
+    condition:
+    - condition: state
+      entity_id: group.grp_watchwinder_display
+      state: 'off'
+    - condition: state
+      entity_id: group.grp_watchwinder_power
+      state: 'on'      
+    action:
+    - data:
+        entity_id: group.grp_watchwinder_display
+      service: switch.turn_on
+  - id: '15651275318971'
+    alias: WatchwinderMotionOff
+    trigger:
+    - entity_id: binary_sensor.sr501pir
+      for: 
+        minutes: 3
+      platform: state
+      to: 'off'
+    condition:
+    - condition: state
+      entity_id: group.grp_watchwinder_display
+      state: 'on'
+    - condition: state
+      entity_id: switch.wake_on_lan
+      state: 'off'      
+    action:
+    - data:
+        entity_id: group.grp_watchwinder_display
+      service: switch.turn_off            

@@ -217,7 +217,7 @@ void printLastPage() {
   display.setCursor(0, effectiveOffset);
   display.setTextSize(1);
   display.print(F("WATCH WINDER "));
-  display.println(VERSION_SHORT);
+  display.println(VERSION);
   display.println(F("by DPsoftware"));
   display.println(F(""));
   
@@ -413,7 +413,7 @@ void sendInfoState() {
   root["Whoami"] = SENSORNAME;
   root["IP"] = WiFi.localIP().toString();
   root["MAC"] = WiFi.macAddress();
-  root["ver"] = VERSION_SHORT;
+  root["ver"] = VERSION;
 
   root["State"] = (stateOn) ? on_cmd : off_cmd;
   root["Time"] = timedate;

@@ -51,7 +51,33 @@ sensor:
   - platform: mqtt
     state_topic: 'stat/watchwinder_6/INFO'
     name: 'Last Seen Watchwinder 6'
-    value_template: '{{ value_json.Time }}'  
+    value_template: '{{ value_json.Time }}' 
+
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_1/INFO'
+    name: 'Watchwinder 1 version'
+    value_template: '{{ value_json.ver }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_2/INFO'
+    name: 'Watchwinder 2 version'
+    value_template: '{{ value_json.ver }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_3/INFO'
+    name: 'Watchwinder 3 version'
+    value_template: '{{ value_json.ver }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_4/INFO'
+    name: 'Watchwinder 4 version'
+    value_template: '{{ value_json.ver }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_5/INFO'
+    name: 'Watchwinder 5 version'
+    value_template: '{{ value_json.ver }}'
+  - platform: mqtt
+    state_topic: 'stat/watchwinder_6/INFO'
+    name: 'Watchwinder 6 version'
+    value_template: '{{ value_json.ver }}' 
+    
   - platform: mqtt
     state_topic: 'stat/watchwinder_1/INFO'
     name: 'Rotazioni effettuate 1'
@@ -80,16 +106,22 @@ sensor:
 input_boolean:
   keep_it_wound_1:
     name: Mantieni carico 1
+    initial: off
   keep_it_wound_2:
     name: Mantieni carico 2
+    initial: off
   keep_it_wound_3:
     name: Mantieni carico 3
+    initial: off
   keep_it_wound_4:
     name: Mantieni carico 4
+    initial: off
   keep_it_wound_5:
     name: Mantieni carico 5
+    initial: off
   keep_it_wound_6:
     name: Mantieni carico 6    
+    initial: off
     
 input_select:
   marcia_watchwinder:
@@ -152,85 +184,85 @@ input_select:
 input_number:
   roration_speed_watchwinder:
     name: Durata rotazione
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_watchwinder:
     name: Numero rotazioni giornaliere
-    initial: 300
+    initial: 700
     min: 50
     max: 900
     step: 50
   roration_speed_1:
     name: Durata rotazione 1
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_1:
     name: Numero rotazioni giornaliere 1
-    initial: 300
+    initial: 800
     min: 50
     max: 900
     step: 50
   roration_speed_2:
     name: Durata rotazione 2
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_2:
     name: Numero rotazioni giornaliere 2
-    initial: 300
+    initial: 700
     min: 50
     max: 900
     step: 50
   roration_speed_3:
     name: Durata rotazione 3
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_3:
     name: Numero rotazioni giornaliere 3
-    initial: 300
+    initial: 900
     min: 50
     max: 900
     step: 50
   roration_speed_4:
     name: Durata rotazione 4
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_4:
     name: Numero rotazioni giornaliere 4
-    initial: 300
+    initial: 700
     min: 50
     max: 900
     step: 50
   roration_speed_5:
     name: Durata rotazione 5
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_5:
     name: Numero rotazioni giornaliere 5
-    initial: 300
+    initial: 700
     min: 50
     max: 900
     step: 50
   roration_speed_6:
     name: Durata rotazione 6
-    initial: 2500
+    initial: 900
     min: 900
     max: 2500
     step: 100
   rotation_number_6:
     name: Numero rotazioni giornaliere 6
-    initial: 300
+    initial: 700
     min: 50
     max: 900
     step: 50    
@@ -558,7 +590,7 @@ automation:
   - id: '1566422132712'
     alias: Mantieni Carico 1
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -577,7 +609,7 @@ automation:
   - id: '1566422132713'
     alias: Mantieni Carico 2
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -588,7 +620,7 @@ automation:
               entity_id: input_boolean.keep_it_wound_2
               state: 'on'
             - condition: template
-              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+              value_template: '{{ (now().strftime("%d") | int) == 2 }}'
     action:
     - data:
         entity_id: switch.watchwinder_2
@@ -596,7 +628,7 @@ automation:
   - id: '1566422132714'
     alias: Mantieni Carico 3
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -607,7 +639,7 @@ automation:
               entity_id: input_boolean.keep_it_wound_3
               state: 'on'
             - condition: template
-              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+              value_template: '{{ (now().strftime("%d") | int) == 3 }}'
     action:
     - data:
         entity_id: switch.watchwinder_3
@@ -615,7 +647,7 @@ automation:
   - id: '1566422132715'
     alias: Mantieni Carico 4
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -626,7 +658,7 @@ automation:
               entity_id: input_boolean.keep_it_wound_4
               state: 'on'
             - condition: template
-              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+              value_template: '{{ (now().strftime("%d") | int) == 4 }}'
     action:
     - data:
         entity_id: switch.watchwinder_4
@@ -634,7 +666,7 @@ automation:
   - id: '1566422132716'
     alias: Mantieni Carico 5
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -645,7 +677,7 @@ automation:
               entity_id: input_boolean.keep_it_wound_5
               state: 'on'
             - condition: template
-              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+              value_template: '{{ (now().strftime("%d") | int) == 5 }}'
     action:
     - data:
         entity_id: switch.watchwinder_5
@@ -653,7 +685,7 @@ automation:
   - id: '1566422132717'
     alias: Mantieni Carico 6
     trigger:
-    - at: '20:00:00'
+    - at: '19:00:00'
       platform: time
     condition:
       condition: and
@@ -664,7 +696,7 @@ automation:
               entity_id: input_boolean.keep_it_wound_6
               state: 'on'
             - condition: template
-              value_template: '{{ (now().strftime("%d") | int) == 1 }}'
+              value_template: '{{ (now().strftime("%d") | int) == 6 }}'
     action:
     - data:
         entity_id: switch.watchwinder_6

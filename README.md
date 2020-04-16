@@ -1,5 +1,6 @@
-# Smart Watch Winder by Davide Perini
-Smart watch winder for menchanical watches
+# Smart Watch Winder
+Smart watch winder for menchanical watches  
+DPsoftware (Davide Perini)  
 
 Components:
 - Arduino C++ sketch running on an ESP8266EX D1 Mini from Lolin running @ 160MHz

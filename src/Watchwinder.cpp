@@ -12,7 +12,6 @@
  *   - Google Home Mini for Voice Recognition
  * MIT license
  */
-#include <FS.h> //this needs to be first, or it all crashes and burns...
 #include <Watchwinder.h>
 
 /********************************** START CALLBACK*****************************************/

@@ -1,3 +1,4 @@
+#include <FS.h> //this needs to be first, or it all crashes and burns...
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
@@ -416,7 +417,7 @@ const unsigned char powerLogo [] PROGMEM = {
 #define powerLogoW  44
 #define powerLogoH  44
 
-/********************************** FUNCTION DECLARATION (NEEDED BY VSCODE WHILE COMPILING CPP FILES) *****************************************/
+/********************************** FUNCTION DECLARATION (NEEDED BY PLATFORMIO WHILE COMPILING CPP FILES) *****************************************/
 bool processSmartostatClimateJson(char *message);
 bool processDisplayCmnd(char *message);
 bool processCmndPower(char *message);

@@ -14,6 +14,201 @@
  */
 #include <Watchwinder.h>
 
+/********************************** START SETUP*****************************************/
+void setup() {
+  Serial.begin(serialRate);
+
+  // Stepper Motor PINS
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  
+  // LED_BUILTIN
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
+  display.setTextColor(WHITE);
+
+  setup_wifi();
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(callback);
+
+  //OTA SETUP
+  ArduinoOTA.setPort(OTAport);
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname(SENSORNAME);
+
+  // No authentication by default
+  ArduinoOTA.setPassword((const char *)OTApassword);
+
+  ArduinoOTA.onStart([]() {
+    Serial.println(F("Starting"));
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println(F("\nEnd"));
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println(F("Auth Failed"));
+    else if (error == OTA_BEGIN_ERROR) Serial.println(F("Begin Failed"));
+    else if (error == OTA_CONNECT_ERROR) Serial.println(F("Connect Failed"));
+    else if (error == OTA_RECEIVE_ERROR) Serial.println(F("Receive Failed"));
+    else if (error == OTA_END_ERROR) Serial.println(F("End Failed"));
+  });
+  ArduinoOTA.begin();
+
+  Serial.println(F("Ready"));
+  Serial.print(F("IP Address: "));
+  Serial.println(WiFi.localIP());
+
+}
+
+/********************************** START SETUP WIFI *****************************************/
+void setup_wifi() {
+
+  unsigned int reconnectAttemp = 0;
+
+  // DPsoftware domotics
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setCursor(5,17);
+  display.drawRoundRect(0, 0, display.width()-1, display.height()-1, display.height()/4, WHITE);
+  display.println(F("DPsoftware domotics"));
+  display.display();
+
+  delay(delay_3000);
+
+  // Read config.json from SPIFFS
+  readConfigFromSPIFFS();
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.println(F("Connecting to: "));
+  display.print(ssid); display.println(F("..."));
+  display.display();
+
+  Serial.println();
+  Serial.print(F("Connecting to "));
+  Serial.print(ssid);  
+
+  delay(delay_2000);
+
+  WiFi.persistent(false);   // Solve possible wifi init errors (re-add at 6.2.1.16 #4044, #4083)
+  WiFi.disconnect(true);    // Delete SDK wifi config
+  delay(200);
+  WiFi.mode(WIFI_STA);      // Disable AP mode
+  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  WiFi.setAutoConnect(true);
+  // IP of the arduino, dns, gateway
+  WiFi.config(arduinoip, mydns, mygateway);
+
+  WiFi.hostname(SENSORNAME);
+
+  // Set wifi power in dbm range 0/0.25, set to 0 to reduce PIR false positive due to wifi power
+  WiFi.setOutputPower(0);
+
+  WiFi.begin(ssid, password);
+
+  // loop here until connection
+  while (WiFi.status() != WL_CONNECTED) {
+    
+    delay(500);
+    Serial.print(F("."));
+    reconnectAttemp++;
+    if (reconnectAttemp > 10) {
+      display.setCursor(0,0);
+      display.clearDisplay();
+      display.print(F("Reconnect attemp= "));
+      display.println(reconnectAttemp);
+      if (reconnectAttemp >= MAX_RECONNECT) {
+        display.println(F("Max retry reached, powering off peripherals."));
+        // shut down stepper motor if wifi disconnects
+        stepperMotorOn = false;
+        writeStep(arrayDefault); 
+      }
+      display.display();
+    } else if (reconnectAttemp > 10000) {
+      reconnectAttemp = 0;
+    }
+  }
+
+  display.println(F("WIFI CONNECTED"));
+  display.println(WiFi.localIP());
+  display.display();
+
+  // reset the lastWIFiConnection to off, will be initialized by next time update
+  lastWIFiConnection = off_cmd;
+
+  delay(delay_1500);
+}
+
+/********************************** START MQTT RECONNECT*****************************************/
+void mqttReconnect() {
+  // how many attemps to MQTT connection
+  int brokermqttcounter = 0;
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0,0);
+    if (brokermqttcounter <= 20) {
+      display.println(F("Connecting to"));
+      display.println(F("MQTT Broker..."));
+    } 
+    // display.println(F("MQTT Broker...");
+    display.display();
+
+    // Attempt to connect
+    if (client.connect(SENSORNAME, mqtt_username, mqtt_password)) {
+      Serial.println(F("connected"));
+      display.println(F(""));
+      display.println(F("CONNECTED"));
+      display.println(F(""));
+      display.println(F("Reading data from"));
+      display.println(F("the network..."));
+      display.display();
+      client.subscribe(smartostat_climate_state_topic);
+      client.subscribe(watchwinder_cmnd_reboot);   
+      client.subscribe(watchwinder_cmnd_showlastpage);            
+      client.subscribe(watchwinder_cmnd_topic);
+      client.subscribe(watchwinder_cmnd_power);
+      client.subscribe(watchwinder_settings);
+
+      delay(delay_2000);
+      brokermqttcounter = 0;
+      // reset the lastMQTTConnection to off, will be initialized by next time update
+      lastMQTTConnection = off_cmd;
+    } else {
+      display.println(F("Number of attempts="));
+      display.println(brokermqttcounter);
+      display.display();
+      // after 10 attemps all peripherals are shut down
+      if (brokermqttcounter >= MAX_RECONNECT) {
+        display.println(F("Max retry reached, powering off peripherals."));
+        display.display();
+        // shut down stepper motor if wifi disconnects
+        stepperMotorOn = false;
+        writeStep(arrayDefault);        
+      } else if (brokermqttcounter > 10000) {
+        brokermqttcounter = 0;
+      }
+      brokermqttcounter++;
+      // Wait 5 seconds before retrying
+      delay(500);
+    }
+  }
+}
+
 /********************************** START CALLBACK*****************************************/
 void callback(char* topic, byte* payload, unsigned int length) {
   // Serial.print(F("Message arrived from [");
@@ -481,63 +676,6 @@ void stepperMotorManager() {
   }
 }
 
-/********************************** START MQTT RECONNECT*****************************************/
-void mqttReconnect() {
-  // how many attemps to MQTT connection
-  int brokermqttcounter = 0;
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0,0);
-    if (brokermqttcounter <= 20) {
-      display.println(F("Connecting to"));
-      display.println(F("MQTT Broker..."));
-    } 
-    // display.println(F("MQTT Broker...");
-    display.display();
-
-    // Attempt to connect
-    if (client.connect(SENSORNAME, mqtt_username, mqtt_password)) {
-      Serial.println(F("connected"));
-      display.println(F(""));
-      display.println(F("CONNECTED"));
-      display.println(F(""));
-      display.println(F("Reading data from"));
-      display.println(F("the network..."));
-      display.display();
-      client.subscribe(smartostat_climate_state_topic);
-      client.subscribe(watchwinder_cmnd_reboot);   
-      client.subscribe(watchwinder_cmnd_showlastpage);            
-      client.subscribe(watchwinder_cmnd_topic);
-      client.subscribe(watchwinder_cmnd_power);
-      client.subscribe(watchwinder_settings);
-
-      delay(delay_2000);
-      brokermqttcounter = 0;
-      // reset the lastMQTTConnection to off, will be initialized by next time update
-      lastMQTTConnection = off_cmd;
-    } else {
-      display.println(F("Number of attempts="));
-      display.println(brokermqttcounter);
-      display.display();
-      // after 10 attemps all peripherals are shut down
-      if (brokermqttcounter >= MAX_RECONNECT) {
-        display.println(F("Max retry reached, powering off peripherals."));
-        display.display();
-        // shut down stepper motor if wifi disconnects
-        stepperMotorOn = false;
-        writeStep(arrayDefault);        
-      } else if (brokermqttcounter > 10000) {
-        brokermqttcounter = 0;
-      }
-      brokermqttcounter++;
-      // Wait 5 seconds before retrying
-      delay(500);
-    }
-  }
-}
-
 // Send status to MQTT broker every ten seconds
 void delayAndSendStatus() {
   if(millis() > timeNowStatus + tenSecondsPeriod){
@@ -675,87 +813,6 @@ String getValue(String data, char separator, int index)
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-
-/********************************** START SETUP WIFI *****************************************/
-void setup_wifi() {
-
-  unsigned int reconnectAttemp = 0;
-
-  // DPsoftware domotics
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setCursor(5,17);
-  display.drawRoundRect(0, 0, display.width()-1, display.height()-1, display.height()/4, WHITE);
-  display.println(F("DPsoftware domotics"));
-  display.display();
-
-  delay(delay_3000);
-
-  // Read config.json from SPIFFS
-  readConfigFromSPIFFS();
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(0,0);
-  display.println(F("Connecting to: "));
-  display.print(ssid); display.println(F("..."));
-  display.display();
-
-  Serial.println();
-  Serial.print(F("Connecting to "));
-  Serial.print(ssid);  
-
-  delay(delay_2000);
-
-  WiFi.persistent(false);   // Solve possible wifi init errors (re-add at 6.2.1.16 #4044, #4083)
-  WiFi.disconnect(true);    // Delete SDK wifi config
-  delay(200);
-  WiFi.mode(WIFI_STA);      // Disable AP mode
-  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  WiFi.setAutoConnect(true);
-  // IP of the arduino, dns, gateway
-  WiFi.config(arduinoip, mydns, mygateway);
-
-  WiFi.hostname(SENSORNAME);
-
-  // Set wifi power in dbm range 0/0.25, set to 0 to reduce PIR false positive due to wifi power
-  WiFi.setOutputPower(0);
-
-  WiFi.begin(ssid, password);
-
-  // loop here until connection
-  while (WiFi.status() != WL_CONNECTED) {
-    
-    delay(500);
-    Serial.print(F("."));
-    reconnectAttemp++;
-    if (reconnectAttemp > 10) {
-      display.setCursor(0,0);
-      display.clearDisplay();
-      display.print(F("Reconnect attemp= "));
-      display.println(reconnectAttemp);
-      if (reconnectAttemp >= MAX_RECONNECT) {
-        display.println(F("Max retry reached, powering off peripherals."));
-        // shut down stepper motor if wifi disconnects
-        stepperMotorOn = false;
-        writeStep(arrayDefault); 
-      }
-      display.display();
-    } else if (reconnectAttemp > 10000) {
-      reconnectAttemp = 0;
-    }
-  }
-
-  display.println(F("WIFI CONNECTED"));
-  display.println(WiFi.localIP());
-  display.display();
-
-  // reset the lastWIFiConnection to off, will be initialized by next time update
-  lastWIFiConnection = off_cmd;
-
-  delay(delay_1500);
-}
-
 /*
    Return the quality (Received Signal Strength Indicator) of the WiFi network.
    Returns a number between 0 and 100 if WiFi is connected.
@@ -787,64 +844,6 @@ void nonBlokingBlink() {
       digitalWrite(LED_BUILTIN, HIGH);
     }
   }  
-}
-
-/********************************** START SETUP*****************************************/
-void setup() {
-  Serial.begin(serialRate);
-
-  // Stepper Motor PINS
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-  
-  // LED_BUILTIN
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-
-  display.setTextColor(WHITE);
-
-  setup_wifi();
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
-
-  //OTA SETUP
-  ArduinoOTA.setPort(OTAport);
-  // Hostname defaults to esp8266-[ChipID]
-  ArduinoOTA.setHostname(SENSORNAME);
-
-  // No authentication by default
-  ArduinoOTA.setPassword((const char *)OTApassword);
-
-  ArduinoOTA.onStart([]() {
-    Serial.println(F("Starting"));
-  });
-  ArduinoOTA.onEnd([]() {
-    Serial.println(F("\nEnd"));
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println(F("Auth Failed"));
-    else if (error == OTA_BEGIN_ERROR) Serial.println(F("Begin Failed"));
-    else if (error == OTA_CONNECT_ERROR) Serial.println(F("Connect Failed"));
-    else if (error == OTA_RECEIVE_ERROR) Serial.println(F("Receive Failed"));
-    else if (error == OTA_END_ERROR) Serial.println(F("End Failed"));
-  });
-  ArduinoOTA.begin();
-
-  Serial.println(F("Ready"));
-  Serial.print(F("IP Address: "));
-  Serial.println(WiFi.localIP());
-
 }
 
 /********************************** START MAIN LOOP *****************************************/

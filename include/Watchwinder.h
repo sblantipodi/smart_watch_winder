@@ -418,7 +418,10 @@ const unsigned char powerLogo [] PROGMEM = {
 #define powerLogoH  44
 
 /********************************** FUNCTION DECLARATION (NEEDED BY PLATFORMIO WHILE COMPILING CPP FILES) *****************************************/
+void setup_wifi();
+
 bool processSmartostatClimateJson(char *message);
+void callback(char* topic, byte* payload, unsigned int length);
 bool processDisplayCmnd(char *message);
 bool processCmndPower(char *message);
 bool processCmndSettings(char *message);

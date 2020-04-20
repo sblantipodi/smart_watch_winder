@@ -5,6 +5,7 @@ _Written for Arduino IDE and PlatformIO._
 [![GitHub version](https://img.shields.io/github/v/release/sblantipodi/smart_watch_winder.svg)](https://img.shields.io/github/v/release/sblantipodi/smart_watch_winder.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/sblantipodi/smart_watch_winder/graphs/commit-activity)
+[![DPsoftware](https://img.shields.io/static/v1?label=DP&message=Software&color=orange)](https://www.dpsoftware.org)
 
 If you like **Smart Watch Winder**, give it a star, or fork it and contribute!
 

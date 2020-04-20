@@ -38,3 +38,6 @@ If you like **Smart Watch Winder**, give it a star, or fork it and contribute!
 ## Home Assistant Mobile Client Screenshots
 ![PHOTO5](https://github.com/sblantipodi/smart_watch_winder/blob/master/data/img/home_assistant1.jpg)
 ![PHOTO6](https://github.com/sblantipodi/smart_watch_winder/blob/master/data/img/home_assistant2.jpg)
+
+## License
+This program is licensed under MIT License

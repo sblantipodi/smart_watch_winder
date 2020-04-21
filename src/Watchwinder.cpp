@@ -28,7 +28,8 @@
 
 /********************************** START SETUP*****************************************/
 void setup() {
-  Serial.begin(serialRate);
+
+  Serial.begin(SERIAL_RATE);
 
   // Stepper Motor PINS
   pinMode(IN1, OUTPUT);
@@ -47,178 +48,37 @@ void setup() {
 
   display.setTextColor(WHITE);
 
-  setup_wifi();
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
+  // Bootsrap setup() with Wifi and MQTT functions
+  bootstrapManager.bootstrapSetup(manageDisconnections, manageHardwareButton, callback);
 
-  //OTA SETUP
-  ArduinoOTA.setPort(OTAport);
-  // Hostname defaults to esp8266-[ChipID]
-  ArduinoOTA.setHostname(SENSORNAME);
-
-  // No authentication by default
-  ArduinoOTA.setPassword((const char *)OTApassword);
-
-  ArduinoOTA.onStart([]() {
-    Serial.println(F("Starting"));
-  });
-  ArduinoOTA.onEnd([]() {
-    Serial.println(F("\nEnd"));
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println(F("Auth Failed"));
-    else if (error == OTA_BEGIN_ERROR) Serial.println(F("Begin Failed"));
-    else if (error == OTA_CONNECT_ERROR) Serial.println(F("Connect Failed"));
-    else if (error == OTA_RECEIVE_ERROR) Serial.println(F("Receive Failed"));
-    else if (error == OTA_END_ERROR) Serial.println(F("End Failed"));
-  });
-  ArduinoOTA.begin();
-
-  Serial.println(F("Ready"));
-  Serial.print(F("IP Address: "));
-  Serial.println(WiFi.localIP());
-
-}
-
-/********************************** START SETUP WIFI *****************************************/
-void setup_wifi() {
-
-  unsigned int reconnectAttemp = 0;
-
-  // DPsoftware domotics
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setCursor(5,17);
-  display.drawRoundRect(0, 0, display.width()-1, display.height()-1, display.height()/4, WHITE);
-  display.println(F("DPsoftware domotics"));
-  display.display();
-
-  delay(delay_3000);
-
-  // Read config.json from SPIFFS
   readConfigFromSPIFFS();
 
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(0,0);
-  display.println(F("Connecting to: "));
-  display.print(ssid); display.println(F("..."));
-  display.display();
-
-  Serial.println();
-  Serial.print(F("Connecting to "));
-  Serial.print(ssid);  
-
-  delay(delay_2000);
-
-  WiFi.persistent(false);   // Solve possible wifi init errors (re-add at 6.2.1.16 #4044, #4083)
-  WiFi.disconnect(true);    // Delete SDK wifi config
-  delay(200);
-  WiFi.mode(WIFI_STA);      // Disable AP mode
-  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  WiFi.setAutoConnect(true);
-  // IP of the arduino, dns, gateway
-  WiFi.config(arduinoip, mydns, mygateway);
-
-  WiFi.hostname(SENSORNAME);
-
-  // Set wifi power in dbm range 0/0.25, set to 0 to reduce PIR false positive due to wifi power
-  WiFi.setOutputPower(0);
-
-  WiFi.begin(ssid, password);
-
-  // loop here until connection
-  while (WiFi.status() != WL_CONNECTED) {
-    
-    delay(500);
-    Serial.print(F("."));
-    reconnectAttemp++;
-    if (reconnectAttemp > 10) {
-      display.setCursor(0,0);
-      display.clearDisplay();
-      display.print(F("Reconnect attemp= "));
-      display.println(reconnectAttemp);
-      if (reconnectAttemp >= MAX_RECONNECT) {
-        display.println(F("Max retry reached, powering off peripherals."));
-        // shut down stepper motor if wifi disconnects
-        stepperMotorOn = false;
-        writeStep(arrayDefault); 
-      }
-      display.display();
-    } else if (reconnectAttemp > 10000) {
-      reconnectAttemp = 0;
-    }
-  }
-
-  display.println(F("WIFI CONNECTED"));
-  display.println(WiFi.localIP());
-  display.display();
-
-  // reset the lastWIFiConnection to off, will be initialized by next time update
-  lastWIFiConnection = off_cmd;
-
-  delay(delay_1500);
 }
 
-/********************************** START MQTT RECONNECT*****************************************/
-void mqttReconnect() {
-  // how many attemps to MQTT connection
-  int brokermqttcounter = 0;
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0,0);
-    if (brokermqttcounter <= 20) {
-      display.println(F("Connecting to"));
-      display.println(F("MQTT Broker..."));
-    } 
-    // display.println(F("MQTT Broker...");
-    display.display();
+/********************************** MANAGE WIFI AND MQTT DISCONNECTION *****************************************/
+void manageDisconnections() {
+  
+  // shut down stepper motor if wifi disconnects
+  stepperMotorOn = false;
+  writeStep(arrayDefault);       
 
-    // Attempt to connect
-    if (client.connect(SENSORNAME, mqtt_username, mqtt_password)) {
-      Serial.println(F("connected"));
-      display.println(F(""));
-      display.println(F("CONNECTED"));
-      display.println(F(""));
-      display.println(F("Reading data from"));
-      display.println(F("the network..."));
-      display.display();
-      client.subscribe(smartostat_climate_state_topic);
-      client.subscribe(watchwinder_cmnd_reboot);   
-      client.subscribe(watchwinder_cmnd_showlastpage);            
-      client.subscribe(watchwinder_cmnd_topic);
-      client.subscribe(watchwinder_cmnd_power);
-      client.subscribe(watchwinder_settings);
+}
 
-      delay(delay_2000);
-      brokermqttcounter = 0;
-      // reset the lastMQTTConnection to off, will be initialized by next time update
-      lastMQTTConnection = off_cmd;
-    } else {
-      display.println(F("Number of attempts="));
-      display.println(brokermqttcounter);
-      display.display();
-      // after 10 attemps all peripherals are shut down
-      if (brokermqttcounter >= MAX_RECONNECT) {
-        display.println(F("Max retry reached, powering off peripherals."));
-        display.display();
-        // shut down stepper motor if wifi disconnects
-        stepperMotorOn = false;
-        writeStep(arrayDefault);        
-      } else if (brokermqttcounter > 10000) {
-        brokermqttcounter = 0;
-      }
-      brokermqttcounter++;
-      // Wait 5 seconds before retrying
-      delay(500);
-    }
-  }
+/********************************** MQTT SUBSCRIPTIONS *****************************************/
+void manageQueueSubscription() {
+  
+  mqttClient.subscribe(smartostat_climate_state_topic);
+  mqttClient.subscribe(watchwinder_cmnd_reboot);   
+  mqttClient.subscribe(watchwinder_cmnd_showlastpage);            
+  mqttClient.subscribe(watchwinder_cmnd_topic);
+  mqttClient.subscribe(watchwinder_cmnd_power);
+  mqttClient.subscribe(watchwinder_settings);
+  
+}
+
+/********************************** MANAGE HARDWARE BUTTON *****************************************/
+void manageHardwareButton() {
+ 
 }
 
 /********************************** START CALLBACK*****************************************/
@@ -276,18 +136,18 @@ void drawOrShutDownDisplay() {
 }
 
 void draw() {
+
   display.clearDisplay();
   
   // Show last page, showLastPage can only be triggered via MQTT due there is no physical button
   if (showLastPage) {
-    printLastPage();
+    bootstrapManager.drawInfoPage(VERSION, AUTHOR);
   } else {
-    if (screenSaverTriggered) {
-      drawScreenSaver();
-    }
+    
+    bootstrapManager.drawScreenSaver(AUTHOR + " domotics");
 
     if (showHaSplashScreen) {
-      drawCenterScreenLogo(showHaSplashScreen, habigLogo, habigLogoW, habigLogoH, delay_4000);
+      drawCenterScreenLogo(showHaSplashScreen, HABIGLOGO, HABIGLOGOW, HABIGLOGOH, DELAY_10);
     } 
 
     // Print rotation done
@@ -394,59 +254,6 @@ void draw() {
   display.display();
 }
 
-void drawScreenSaver() {
-  display.clearDisplay();
-  for (int i = 0; i < 50; i++) {
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setCursor(5,17);
-    display.fillRect(0, 0, display.width(), display.height(), i%2 != 0 ? WHITE : BLACK);
-    display.setTextColor(i%2 == 0 ? WHITE : BLACK);
-    display.drawRoundRect(0, 0, display.width()-1, display.height()-1, display.height()/4, i%2 == 0 ? WHITE : BLACK);
-    display.println(F("DPsoftware domotics"));
-    display.display();
-  }
-  display.setTextColor(WHITE);
-  screenSaverTriggered = false;
-}
-
-void printLastPage() {
-  yoffset -= 1;
-  // add/remove 8 pixel for every line yoffset <= -209, if you want to add a line yoffset <= -217
-  if (yoffset <= -209) {
-    yoffset = SCREEN_HEIGHT + 6;
-    lastPageScrollTriggered = true;
-  }
-  int effectiveOffset = (yoffset >= 0 && !lastPageScrollTriggered) ? 0 : yoffset;
-
-  display.drawBitmap((display.width()-habigLogoW)-1, effectiveOffset+5, habigLogo, habigLogoW, habigLogoH, 1);
-  display.setCursor(0, effectiveOffset);
-  display.setTextSize(1);
-  display.print(F("WATCH WINDER "));
-  display.println(VERSION);
-  display.println(F("by DPsoftware"));
-  display.println(F(""));
-  
-  display.print(F("HA: ")); display.print(F("(")); display.print(haVersion); display.println(F(")"));
-  display.print(F("Wifi: ")); display.print(getQuality()); display.println(F("%")); 
-  display.print(F("Heap: ")); display.print(ESP.getFreeHeap()/1024); display.println(F(" KB")); 
-  display.print(F("Free Flash: ")); display.print(ESP.getFreeSketchSpace()/1024); display.println(F(" KB")); 
-  display.print(F("Frequency: ")); display.print(ESP.getCpuFreqMHz()); display.println(F("MHz")); 
-
-  display.print(F("Flash: ")); display.print(ESP.getFlashChipSize()/1024); display.println(F(" KB")); 
-  display.print(F("Sketch: ")); display.print(ESP.getSketchSize()/1024); display.println(F(" KB")); 
-  display.print(F("IP: ")); display.println(WiFi.localIP());
-  display.println(F("MAC: ")); display.println(WiFi.macAddress());
-  display.print(F("SDK: ")); display.println(ESP.getSdkVersion());
-  display.print(F("Arduino Core: ")); display.println(ESP.getCoreVersion());
-  display.println(F("Last Boot: ")); display.println(lastBoot);
-  display.println(F("Last WiFi connection:")); display.println(lastWIFiConnection);
-  display.println(F("Last MQTT connection:")); display.println(lastMQTTConnection);
-
-  // add/remove 8 pixel for every line effectiveOffset+175, if you want to add a line effectiveOffset+183
-  display.drawBitmap((((display.width()/2)-(arduinoLogoW/2))), effectiveOffset+175, arduinoLogo, arduinoLogoW, arduinoLogoH, 1);
-}
-
 void drawCenterScreenLogo(bool &triggerBool, const unsigned char* logo, const int logoW, const int logoH, const int delayInt) {
   display.clearDisplay();
   display.setTextSize(1);
@@ -480,17 +287,17 @@ bool processSmartostatClimateJson(char* message) {
   if (doc.containsKey("smartostat")) {
     const char* timeConst = doc["Time"];
     // On first boot the timedate variable is OFF
-    if (timedate == off_cmd) {
-      setDateTime(timeConst);
+    if (timedate == OFF_CMD) {
+      helper.setDateTime(timeConst);
       lastBoot = date + " " + currentime;
     } else {
-      setDateTime(timeConst);
+      helper.setDateTime(timeConst);
     }
     // lastMQTTConnection and lastWIFiConnection are resetted on every disconnection
-    if (lastMQTTConnection == off_cmd) {
+    if (lastMQTTConnection == OFF_CMD) {
       lastMQTTConnection = date + " " + currentime;
     }
-    if (lastWIFiConnection == off_cmd) {
+    if (lastWIFiConnection == OFF_CMD) {
       lastWIFiConnection = date + " " + currentime;
     }
     const char* haVersionConst = doc["haVersion"];
@@ -500,9 +307,9 @@ bool processSmartostatClimateJson(char* message) {
 }
 
 bool processDisplayCmnd(char* message) {
-  if(strcmp(message, on_cmd) == 0) {
+  if(strcmp(message, ON_CMD) == 0) {
     stateOn = true;
-  } else if(strcmp(message, off_cmd) == 0) {
+  } else if(strcmp(message, OFF_CMD) == 0) {
     stateOn = false;
   }
   screenSaverTriggered = false;
@@ -516,10 +323,10 @@ bool processCmndPower(char* message) {
   # else
     anticlockwise = false;
   #endif
-  if(strcmp(message, on_cmd) == 0) {
+  if(strcmp(message, ON_CMD) == 0) {
     stepperMotorOn = true;
     stateOn = true;
-  } else if(strcmp(message, off_cmd) == 0) {
+  } else if(strcmp(message, OFF_CMD) == 0) {
     stepperMotorOn = false;
     stateOn = false;
     numbersOfRotationDone = 0;  
@@ -568,47 +375,41 @@ bool processCmndSettings(char* message) {
 
 bool processRebootCmnd(char* message) {
   String rebootState = message;
-  sendRebootState(off_cmd);
-  if (rebootState == off_cmd) {      
+  sendRebootState(OFF_CMD);
+  if (rebootState == OFF_CMD) {      
     sendRebootCmnd();
   }
   return true;
 }
 
 bool processShowLastPageCmnd(char* message) {
-  if(strcmp(message, on_cmd) == 0) {
+  if(strcmp(message, ON_CMD) == 0) {
     showLastPage = true;
     stateOn = true;
     sendMotorPowerState();
     sendPowerState();
-  } else if(strcmp(message, off_cmd) == 0) {
+  } else if(strcmp(message, OFF_CMD) == 0) {
     showLastPage = false;
   } 
   return true;
 }
 
-void setDateTime(const char* timeConst) {
-  timedate = timeConst;
-  date = timedate.substring(8,10) + "/" + timedate.substring(5,7) + "/" + timedate.substring(0,4);
-  currentime = timedate.substring(11,16);
-}
-
 /********************************** SEND STATE *****************************************/
 void sendPowerState() {
   drawOrShutDownDisplay();
-  client.publish(watchwinder_state_topic, (stateOn) ? on_cmd : off_cmd, true);
+  mqttClient.publish(watchwinder_state_topic, (stateOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendMotorPowerState() {
-  client.publish(watchwinder_stat_power, (stepperMotorOn) ? on_cmd : off_cmd, true);
+  mqttClient.publish(watchwinder_stat_power, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendPowerStateCmnd() {
-  client.publish(watchwinder_cmnd_topic, (stateOn) ? on_cmd : off_cmd, true);
+  mqttClient.publish(watchwinder_cmnd_topic, (stateOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendMotorPowerStateCmnd() {
-  client.publish(watchwinder_cmnd_power, (stepperMotorOn) ? on_cmd : off_cmd, true);
+  mqttClient.publish(watchwinder_cmnd_power, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendInfoState() {
@@ -616,12 +417,12 @@ void sendInfoState() {
 
   JsonObject root = doc.to<JsonObject>();
 
-  root["Whoami"] = SENSORNAME;
+  root["Whoami"] = WIFI_DEVICE_NAME;
   root["IP"] = WiFi.localIP().toString();
   root["MAC"] = WiFi.macAddress();
   root["ver"] = VERSION;
 
-  root["State"] = (stateOn) ? on_cmd : off_cmd;
+  root["State"] = (stateOn) ? ON_CMD : OFF_CMD;
   root["Time"] = timedate;
   root["rotation_done"] = numbersOfRotationDone;
 
@@ -629,17 +430,17 @@ void sendInfoState() {
   serializeJson(root, buffer, sizeof(buffer));
 
   // publish state only if it has received time from HA
-  if (timedate != off_cmd) {
-    client.publish(watchwinder_info_topic, buffer, true);
+  if (timedate != OFF_CMD) {
+    mqttClient.publish(watchwinder_info_topic, buffer, true);
   }
 }
 
 void sendRebootState(const char* onOff) {   
-  client.publish(watchwinder_stat_reboot, onOff, true);
+  mqttClient.publish(watchwinder_stat_reboot, onOff, true);
 }
 
 void sendRebootCmnd() {   
-  delay(delay_1500);
+  delay(DELAY_10);
   ESP.restart();
 }
 
@@ -785,7 +586,7 @@ void readConfigFromSPIFFS() {
   }
   display.display();
   if (!error) {
-    delay(delay_4000);
+    delay(DELAY_10);
   }
 }
 
@@ -807,74 +608,12 @@ void writeConfigToSPIFFS() {
     }
 }
 
-// https://stackoverflow.com/questions/9072320/split-string-into-string-array
-String getValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length()-1;
-
-  for(int i=0; i<=maxIndex && found<=index; i++){
-    if(data.charAt(i)==separator || i==maxIndex){
-        found++;
-        strIndex[0] = strIndex[1]+1;
-        strIndex[1] = (i == maxIndex) ? i+1 : i;
-    }
-  }
-
-  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-
-/*
-   Return the quality (Received Signal Strength Indicator) of the WiFi network.
-   Returns a number between 0 and 100 if WiFi is connected.
-   Returns -1 if WiFi is disconnected.
-*/
-int getQuality() {
-  if (WiFi.status() != WL_CONNECTED)
-    return -1;
-  int dBm = WiFi.RSSI();
-  if (dBm <= -100)
-    return 0;
-  if (dBm >= -50)
-    return 100;
-  return 2 * (dBm + 100);
-}
-
-// Blink LED_BUILTIN without bloking delay
-void nonBlokingBlink() {
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval && ledTriggered) {
-    // save the last time you blinked the LED
-    previousMillis = currentMillis;
-    // blink led
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    blinkCounter++;
-    if (blinkCounter >= blinkTimes) {
-      blinkCounter = 0;
-      ledTriggered = false;
-      digitalWrite(LED_BUILTIN, HIGH);
-    }
-  }  
-}
-
 /********************************** START MAIN LOOP *****************************************/
 // Screen drawing call is done outside the loop for non blocking low delay loop needed to drive stepper motor without rattling
 void loop() {  
-  // Wifi management
-  if (WiFi.status() != WL_CONNECTED) {
-    delay(1);
-    Serial.print(F("WIFI Disconnected. Attempting reconnection."));
-    setup_wifi();
-    return;
-  }
 
-  ArduinoOTA.handle();
-
-  if (!client.connected()) {
-    mqttReconnect();
-  }
-  client.loop();
+  // Bootsrap loop() with Wifi, MQTT and OTA functions
+  bootstrapManager.bootstrapLoop(manageDisconnections, manageQueueSubscription, manageHardwareButton);
 
   // Send status on MQTT Broker every n seconds
   delayAndSendStatus();
@@ -910,7 +649,6 @@ void loop() {
     stepperMotorManager();
     manageStepperMotorEverySeconds();
   } else {
-    stepsLeft == 0;
     moving = false;
     // shut down stepper motor
     writeStep(arrayDefault);
@@ -920,6 +658,6 @@ void loop() {
     }
   }
 
-  nonBlokingBlink();
+  bootstrapManager.nonBlokingBlink();
 
 }

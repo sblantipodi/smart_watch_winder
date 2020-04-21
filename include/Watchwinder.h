@@ -24,59 +24,18 @@
     - Google Home Mini for Voice Recognition  
 */
 
-#include <FS.h> //this needs to be first, or it all crashes and burns...
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <ESP8266mDNS.h>
-#include <ArduinoOTA.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Secrets.h>
-#include <Version.h>
+#include "Version.h"
+#include "Configuration.h"
+#include "../arduino_bootstrapper/core/BootstrapManager.h"
 
 
-/************ WIFI and MQTT Info ******************/
-const int mqtt_port = 1883;
-// DNS address for the shield:
-IPAddress mydns(192, 168, 1, 1);
-// GATEWAY address for the shield:
-IPAddress mygateway(192, 168, 1, 1);
-
-/**************************** OTA **************************************************/
-#ifdef TARGET_WATCHWINDER_1
-  #define SENSORNAME "watchwinder_1"
-  int OTAport = 8280;
-  IPAddress arduinoip(192, 168, 1, 53);
-#endif 
-#ifdef TARGET_WATCHWINDER_2
-  #define SENSORNAME "watchwinder_2"
-  int OTAport = 8281;
-  IPAddress arduinoip(192, 168, 1, 54);
-#endif 
-#ifdef TARGET_WATCHWINDER_3
-  #define SENSORNAME "watchwinder_3"
-  int OTAport = 8282;
-  IPAddress arduinoip(192, 168, 1, 55);
-#endif 
-#ifdef TARGET_WATCHWINDER_4
-  #define SENSORNAME "watchwinder_4"
-  int OTAport = 8283;
-  IPAddress arduinoip(192, 168, 1, 56);
-#endif 
-#ifdef TARGET_WATCHWINDER_5
-  #define SENSORNAME "watchwinder_5"
-  int OTAport = 8284;
-  IPAddress arduinoip(192, 168, 1, 57);
-#endif 
-#ifdef TARGET_WATCHWINDER_6
-  #define SENSORNAME "watchwinder_6"
-  int OTAport = 8285;
-  IPAddress arduinoip(192, 168, 1, 58);
-#endif 
+/****************** BOOTSTRAP and WIFI MANAGER ******************/
+BootstrapManager bootstrapManager;
+Helpers helper;
 
 /**************************** PIN DEFINITIONS **************************************************/
 #define OLED_RESET LED_BUILTIN // Pin used for integrated D1 Mini blue LED
@@ -85,7 +44,7 @@ IPAddress mygateway(192, 168, 1, 1);
 #define IN3 13 //GPIO 13 (D7)
 #define IN4 15 //GPIO 15 (D8)
 const int NBSTEPS = 4095;
-int steptime = 2500;
+unsigned int steptime = 2500;
 int rotationNumber = 300;
 int numbersOfRotationDone = 0;
 int remainingRotation = 300;
@@ -98,9 +57,6 @@ String orientation = MISTO;
 boolean anticlockwise = true;
 String keepItWound = "false";
 
-String haVersion = "";
-bool lastPageScrollTriggered = false;
-int yoffset = 150;
 boolean showLastPage = false;
 
 // all magnet are low, motor is off
@@ -121,15 +77,6 @@ int stepsMatrix[8][4] = {
 
 unsigned long lastTime = 0L;
 unsigned long thistime = 0L;
-
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins) // Address 0x3C for 128x64pixel
-// D2 pin SDA, D1 pin SCL, 5V power 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); 
-
-// Serial rate for debug
-#define serialRate 115200
 
 /************* MQTT TOPICS **************************/
 const char* smartostat_climate_state_topic = "stat/smartostat/CLIMATE";
@@ -190,29 +137,8 @@ bool stateOn = true;
 bool stepperMotorOn = false;
 bool moving = false;
 
-// LED_BUILTIN vars
-unsigned long previousMillis = 0;    // will store last time LED was updated
-const long interval = 200;           // interval at which to blink (milliseconds)
-bool ledTriggered = false;
-const int blinkTimes = 6;            // 6 equals to 3 blink on and 3 off
-int blinkCounter = 0;
-
-const char* on_cmd = "ON";
-const char* off_cmd = "OFF";
-
 // Total Number of pages
 const int numPages = 2;
-String lastBoot = " ";
-String lastMQTTConnection = "OFF";
-String lastWIFiConnection = "OFF";
-
-String timedate = "OFF";
-String date = "OFF";
-String currentime = "OFF";
-const int delay_3000 = 10;
-const int delay_2000 = 10;
-const int delay_4000 = 10;
-const int delay_1500 = 10;
 const int delay_1_minute = 60000;
 int currentPage = 0;
 int offset = 160;
@@ -221,7 +147,6 @@ int stepsLeft;
 bool showHaSplashScreen = true;
 String hours = "";
 String minutes = "";
-bool screenSaverTriggered = false;
 // variable used for faster delay instead of arduino delay(), this custom delay prevent a lot of problem and memory leak
 const int tenSecondsPeriod = 10000;
 unsigned long timeNowStatus = 0;
@@ -229,57 +154,6 @@ const int fiveMinutesPeriod = 300000;
 unsigned long timeNowGoHomeAfterFiveMinutes = 0;
 unsigned long timeNowWriteSpiffsMinute = 0;
 unsigned long timeNowManageStepperMotorAfterSeconds = 0;
-#define MAX_RECONNECT 500
-unsigned int delayTime = 20;
-
-/****************************************FOR JSON***************************************/
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
-
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-
-// 'home-assistant_big', 44x44px
-static const unsigned char habigLogo [] PROGMEM = {
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xc0, 0x00, 0x00,
-	0x00, 0x00, 0x7f, 0xe0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x01, 0xff, 0xf8,
-	0x00, 0x00, 0x00, 0x03, 0xf0, 0xfd, 0xe0, 0x00, 0x00, 0x07, 0xe0, 0x7f, 0xe0, 0x00, 0x00, 0x0f,
-	0xcf, 0x3f, 0xe0, 0x00, 0x00, 0x1f, 0xcf, 0x3f, 0xe0, 0x00, 0x00, 0x3f, 0xe6, 0x7f, 0xe0, 0x00,
-	0x00, 0x7f, 0xe0, 0x7f, 0xe0, 0x00, 0x00, 0xff, 0xf0, 0xff, 0xf0, 0x00, 0x01, 0xff, 0xf0, 0xff,
-	0xf8, 0x00, 0x03, 0xff, 0xf0, 0xff, 0xfc, 0x00, 0x07, 0xf0, 0xf0, 0xf0, 0xfe, 0x00, 0x0f, 0xe0,
-	0x70, 0xe0, 0x7f, 0x00, 0x1f, 0xce, 0x70, 0xe7, 0x3f, 0x80, 0x1f, 0xcf, 0x70, 0xef, 0x3f, 0x80,
-	0x01, 0xce, 0x70, 0xe7, 0x38, 0x00, 0x01, 0xe0, 0x30, 0xc0, 0x78, 0x00, 0x01, 0xf0, 0x10, 0x80,
-	0xf8, 0x00, 0x01, 0xff, 0x00, 0x0f, 0xf8, 0x00, 0x01, 0xff, 0x80, 0x0f, 0xf8, 0x00, 0x01, 0xff,
-	0xc0, 0x1f, 0xf8, 0x00, 0x01, 0xff, 0xe0, 0x3f, 0xf8, 0x00, 0x01, 0xff, 0xf0, 0x7f, 0xf8, 0x00,
-	0x01, 0xff, 0xf0, 0xff, 0xf8, 0x00, 0x01, 0xff, 0xf0, 0xff, 0xf8, 0x00, 0x01, 0xff, 0xf0, 0xff,
-	0xf8, 0x00, 0x01, 0xff, 0xf0, 0xff, 0xf8, 0x00, 0x01, 0xff, 0xf0, 0xff, 0xf8, 0x00, 0x01, 0xff,
-	0xf0, 0xff, 0xf8, 0x00, 0x01, 0xff, 0xf0, 0xff, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-#define habigLogoW  44
-#define habigLogoH  44
-
-// 'arduino', 45x31px
-const unsigned char arduinoLogo [] PROGMEM = {
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x01, 0xe0, 0x00, 0x01, 0xff, 0x80, 0x0f, 
-	0xfc, 0x40, 0x07, 0xff, 0xe0, 0x3f, 0xff, 0x00, 0x0f, 0xff, 0xf0, 0x7f, 0xff, 0x80, 0x1f, 0x01, 
-	0xf8, 0xfc, 0x07, 0xc0, 0x1e, 0x00, 0x7d, 0xf0, 0x03, 0xc0, 0x3c, 0x00, 0x3d, 0xe0, 0x01, 0xe0, 
-	0x38, 0x00, 0x1f, 0xc0, 0xc0, 0xe0, 0x78, 0x00, 0x1f, 0xc0, 0xc0, 0xf0, 0x78, 0x7e, 0x0f, 0x83, 
-	0xf0, 0xf0, 0x78, 0x7e, 0x0f, 0x83, 0xf0, 0xf0, 0x78, 0x00, 0x0f, 0x80, 0xc0, 0xf0, 0x38, 0x00, 
-	0x1f, 0xc0, 0xc0, 0xe0, 0x3c, 0x00, 0x3d, 0xe0, 0x01, 0xe0, 0x3e, 0x00, 0x7d, 0xf0, 0x03, 0xe0, 
-	0x1f, 0x00, 0xf8, 0xf8, 0x07, 0xc0, 0x0f, 0xe7, 0xf0, 0x7f, 0x3f, 0x80, 0x07, 0xff, 0xe0, 0x3f, 
-	0xff, 0x00, 0x03, 0xff, 0xc0, 0x1f, 0xfe, 0x00, 0x00, 0xff, 0x00, 0x07, 0xf8, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x7b, 0xec, 0x9e, 0xc9, 0xe0, 
-	0x1c, 0x4b, 0x2c, 0x8c, 0xeb, 0x20, 0x16, 0x5b, 0x3c, 0x8c, 0xea, 0x30, 0x16, 0x73, 0x3c, 0x8c, 
-	0xfa, 0x30, 0x1e, 0x5b, 0x2c, 0x8c, 0xdb, 0x30, 0x22, 0x4b, 0x6c, 0x8c, 0xd9, 0x60, 0x23, 0x4f, 
-	0x83, 0x1e, 0xc8, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-#define arduinoLogoW  45
-#define arduinoLogoH  31
 
 // 'counter (3)', 44x44px
 const unsigned char counterLogo [] PROGMEM = {
@@ -301,7 +175,6 @@ const unsigned char counterLogo [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
-
 #define counterLogoW  44
 #define counterLogoH  44
 
@@ -444,22 +317,22 @@ const unsigned char powerLogo [] PROGMEM = {
 #define powerLogoH  44
 
 /********************************** FUNCTION DECLARATION (NEEDED BY PLATFORMIO WHILE COMPILING CPP FILES) *****************************************/
-void setup_wifi();
-
-bool processSmartostatClimateJson(char *message);
+// Bootstrap functions
 void callback(char* topic, byte* payload, unsigned int length);
+void manageDisconnections();
+void manageQueueSubscription();
+void manageHardwareButton();
+// Project specific functions
+bool processSmartostatClimateJson(char *message);
 bool processDisplayCmnd(char *message);
 bool processCmndPower(char *message);
 bool processCmndSettings(char *message);
 void drawRoundRect();
 void drawCenterScreenLogo(bool &triggerBool, const unsigned char *logo, const int logoW, const int logoH, const int delayInt);
-void drawScreenSaver();
 void sendPowerState();
 void sendMotorPowerState();
 void readConfigFromSPIFFS();
 void writeConfigToSPIFFS();
-void nonBlokingBlink();
-void setDateTime(const char* timeConst);
 void sendRebootState(const char* onOff);
 void sendRebootCmnd();
 bool processRebootCmnd(char *message);
@@ -473,5 +346,3 @@ void writeConfigToSPIFFSAfterMinute();
 void manageStepperMotorEverySeconds();
 void draw();
 void drawOrShutDownDisplay();
-int getQuality();
-void printLastPage();

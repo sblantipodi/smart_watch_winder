@@ -67,12 +67,12 @@ void manageDisconnections() {
 /********************************** MQTT SUBSCRIPTIONS *****************************************/
 void manageQueueSubscription() {
   
-  mqttClient.subscribe(smartostat_climate_state_topic);
-  mqttClient.subscribe(watchwinder_cmnd_reboot);   
-  mqttClient.subscribe(watchwinder_cmnd_showlastpage);            
-  mqttClient.subscribe(watchwinder_cmnd_topic);
-  mqttClient.subscribe(watchwinder_cmnd_power);
-  mqttClient.subscribe(watchwinder_settings);
+  mqttClient.subscribe(SMARTOSTAT_CLIMATE_STATE_TOPIC);
+  mqttClient.subscribe(WATCHWINDER_CMND_REBOOT);   
+  mqttClient.subscribe(WATCHWINDER_CMND_SHOWLASTPAGE);            
+  mqttClient.subscribe(WATCHWINDER_CMND_TOPIC);
+  mqttClient.subscribe(WATCHWINDER_CMND_POWER);
+  mqttClient.subscribe(WATCHWINDER_SETTINGS);
   
 }
 
@@ -94,32 +94,32 @@ void callback(char* topic, byte* payload, unsigned int length) {
   message[length] = '\0';
   //Serial.println(message);
 
-  if(strcmp(topic, watchwinder_cmnd_reboot) == 0) {
+  if(strcmp(topic, WATCHWINDER_CMND_REBOOT) == 0) {
     if (!processRebootCmnd(message)) {
       return;
     }
   }
-  if(strcmp(topic, watchwinder_cmnd_showlastpage) == 0) {
+  if(strcmp(topic, WATCHWINDER_CMND_SHOWLASTPAGE) == 0) {
     if (!processShowLastPageCmnd(message)) {
       return;
     }
   }
-  if(strcmp(topic, smartostat_climate_state_topic) == 0) {
+  if(strcmp(topic, SMARTOSTAT_CLIMATE_STATE_TOPIC) == 0) {
     if (!processSmartostatClimateJson(message)) {
       return;
     }
   }
-  if(strcmp(topic, watchwinder_cmnd_topic) == 0) {
+  if(strcmp(topic, WATCHWINDER_CMND_TOPIC) == 0) {
     if (!processDisplayCmnd(message)) {
       return;
     }
   }
-  if(strcmp(topic, watchwinder_cmnd_power) == 0) {
+  if(strcmp(topic, WATCHWINDER_CMND_POWER) == 0) {
     if (!processCmndPower(message)) {
       return;
     }
   }
-  if(strcmp(topic, watchwinder_settings) == 0) {
+  if(strcmp(topic, WATCHWINDER_SETTINGS) == 0) {
     if (!processCmndSettings(message)) {
       return;
     }
@@ -397,19 +397,19 @@ bool processShowLastPageCmnd(char* message) {
 /********************************** SEND STATE *****************************************/
 void sendPowerState() {
   drawOrShutDownDisplay();
-  mqttClient.publish(watchwinder_state_topic, (stateOn) ? ON_CMD : OFF_CMD, true);
+  mqttClient.publish(WATCHWINDER_STATE_TOPIC, (stateOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendMotorPowerState() {
-  mqttClient.publish(watchwinder_stat_power, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
+  mqttClient.publish(WATCHWINDER_STAT_POWER, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendPowerStateCmnd() {
-  mqttClient.publish(watchwinder_cmnd_topic, (stateOn) ? ON_CMD : OFF_CMD, true);
+  mqttClient.publish(WATCHWINDER_CMND_TOPIC, (stateOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendMotorPowerStateCmnd() {
-  mqttClient.publish(watchwinder_cmnd_power, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
+  mqttClient.publish(WATCHWINDER_CMND_POWER, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
 }
 
 void sendInfoState() {
@@ -431,12 +431,12 @@ void sendInfoState() {
 
   // publish state only if it has received time from HA
   if (timedate != OFF_CMD) {
-    mqttClient.publish(watchwinder_info_topic, buffer, true);
+    mqttClient.publish(WATCHWINDER_INFO_TOPIC, buffer, true);
   }
 }
 
 void sendRebootState(const char* onOff) {   
-  mqttClient.publish(watchwinder_stat_reboot, onOff, true);
+  mqttClient.publish(WATCHWINDER_STAT_REBOOT, onOff, true);
 }
 
 void sendRebootCmnd() {   

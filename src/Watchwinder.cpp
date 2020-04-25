@@ -24,6 +24,7 @@
     - Google Home Mini for Voice Recognition  
 */
 
+#include <FS.h> //this needs to be first, or it all crashes and burns...
 #include <Watchwinder.h>
 
 /********************************** START SETUP*****************************************/
@@ -67,12 +68,12 @@ void manageDisconnections() {
 /********************************** MQTT SUBSCRIPTIONS *****************************************/
 void manageQueueSubscription() {
   
-  mqttClient.subscribe(SMARTOSTAT_CLIMATE_STATE_TOPIC);
-  mqttClient.subscribe(WATCHWINDER_CMND_REBOOT);   
-  mqttClient.subscribe(WATCHWINDER_CMND_SHOWLASTPAGE);            
-  mqttClient.subscribe(WATCHWINDER_CMND_TOPIC);
-  mqttClient.subscribe(WATCHWINDER_CMND_POWER);
-  mqttClient.subscribe(WATCHWINDER_SETTINGS);
+  bootstrapManager.subscribe(SMARTOSTAT_CLIMATE_STATE_TOPIC);
+  bootstrapManager.subscribe(WATCHWINDER_CMND_REBOOT);   
+  bootstrapManager.subscribe(WATCHWINDER_CMND_SHOWLASTPAGE);            
+  bootstrapManager.subscribe(WATCHWINDER_CMND_TOPIC);
+  bootstrapManager.subscribe(WATCHWINDER_CMND_POWER);
+  bootstrapManager.subscribe(WATCHWINDER_SETTINGS);
   
 }
 
@@ -83,56 +84,34 @@ void manageHardwareButton() {
 
 /********************************** START CALLBACK*****************************************/
 void callback(char* topic, byte* payload, unsigned int length) {
-  // Serial.print(F("Message arrived from [");
-  // Serial.print(topic);
-  // Serial.println(F("] ");
 
-  char message[length + 1];
-  for (unsigned int i = 0; i < length; i++) {
-    message[i] = (char)payload[i];
-  }
-  message[length] = '\0';
-  //Serial.println(message);
+  StaticJsonDocument<BUFFER_SIZE> json = bootstrapManager.parseQueueMsg(topic, payload, length);
 
   if(strcmp(topic, WATCHWINDER_CMND_REBOOT) == 0) {
-    if (!processRebootCmnd(message)) {
-      return;
-    }
+    processRebootCmnd(json);
+  } else if(strcmp(topic, WATCHWINDER_CMND_SHOWLASTPAGE) == 0) {
+    processShowLastPageCmnd(json);
+  } else if(strcmp(topic, SMARTOSTAT_CLIMATE_STATE_TOPIC) == 0) {
+    processSmartostatClimateJson(json);
+  } else if(strcmp(topic, WATCHWINDER_CMND_TOPIC) == 0) {
+    processDisplayCmnd(json);
+  } else if(strcmp(topic, WATCHWINDER_CMND_POWER) == 0) {
+    processCmndPower(json);
+  } else if(strcmp(topic, WATCHWINDER_SETTINGS) == 0) {
+    processCmndSettings(json);
   }
-  if(strcmp(topic, WATCHWINDER_CMND_SHOWLASTPAGE) == 0) {
-    if (!processShowLastPageCmnd(message)) {
-      return;
-    }
-  }
-  if(strcmp(topic, SMARTOSTAT_CLIMATE_STATE_TOPIC) == 0) {
-    if (!processSmartostatClimateJson(message)) {
-      return;
-    }
-  }
-  if(strcmp(topic, WATCHWINDER_CMND_TOPIC) == 0) {
-    if (!processDisplayCmnd(message)) {
-      return;
-    }
-  }
-  if(strcmp(topic, WATCHWINDER_CMND_POWER) == 0) {
-    if (!processCmndPower(message)) {
-      return;
-    }
-  }
-  if(strcmp(topic, WATCHWINDER_SETTINGS) == 0) {
-    if (!processCmndSettings(message)) {
-      return;
-    }
-  }
+
 }
 
 void drawOrShutDownDisplay() {
+
   if (stateOn) {
     draw();
   } else {
     display.clearDisplay();
     display.display();
   }
+
 }
 
 void draw() {
@@ -252,9 +231,11 @@ void draw() {
     display.setTextWrap(true);
   }
   display.display();
+
 }
 
 void drawCenterScreenLogo(bool &triggerBool, const unsigned char* logo, const int logoW, const int logoH, const int delayInt) {
+
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0,0);
@@ -265,27 +246,24 @@ void drawCenterScreenLogo(bool &triggerBool, const unsigned char* logo, const in
   display.display();
   delay(delayInt);
   triggerBool = false;
+
 }
 
 void drawRoundRect() {
+
   display.drawRoundRect(47, 19, 72, 27, 10, WHITE);
   display.drawRoundRect(47, 20, 71, 25, 9, WHITE);
   display.drawRoundRect(47, 20, 71, 25, 10, WHITE);
   display.drawRoundRect(47, 20, 71, 25, 8, WHITE);
   display.drawRoundRect(48, 20, 70, 25, 10, WHITE);
+
 }
 
 /********************************** START PROCESS JSON*****************************************/
-bool processSmartostatClimateJson(char* message) {
-  StaticJsonDocument<BUFFER_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, message);
-  if (error) {
-    Serial.println(F("parseObject() failed 2"));
-    return false;
-  }
-
-  if (doc.containsKey("smartostat")) {
-    const char* timeConst = doc["Time"];
+bool processSmartostatClimateJson(StaticJsonDocument<BUFFER_SIZE> json) {
+  
+  if (json.containsKey("smartostat")) {
+    String timeConst = json["Time"];
     // On first boot the timedate variable is OFF
     if (timedate == OFF_CMD) {
       helper.setDateTime(timeConst);
@@ -300,54 +278,54 @@ bool processSmartostatClimateJson(char* message) {
     if (lastWIFiConnection == OFF_CMD) {
       lastWIFiConnection = date + " " + currentime;
     }
-    const char* haVersionConst = doc["haVersion"];
-    haVersion = haVersionConst;
+    haVersion = helper.getValue(json["haVersion"]);
   }
+
   return true;
+
 }
 
-bool processDisplayCmnd(char* message) {
-  if(strcmp(message, ON_CMD) == 0) {
+bool processDisplayCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+
+  String message = helper.isOnOff(json);
+  if (message == ON_CMD) {
     stateOn = true;
-  } else if(strcmp(message, OFF_CMD) == 0) {
+  } else if(message == OFF_CMD) {
     stateOn = false;
   }
   screenSaverTriggered = false;
   sendPowerState();
   return true;
+
 }
 
-bool processCmndPower(char* message) {
+bool processCmndPower(StaticJsonDocument<BUFFER_SIZE> json) {
+
   #ifdef TARGET_WATCHWINDER_3
     anticlockwise = true;
   # else
     anticlockwise = false;
   #endif
-  if(strcmp(message, ON_CMD) == 0) {
+  String message = helper.isOnOff(json);
+  if (message == ON_CMD) {
     stepperMotorOn = true;
     stateOn = true;
-  } else if(strcmp(message, OFF_CMD) == 0) {
+  } else if(message == OFF_CMD) {
     stepperMotorOn = false;
     stateOn = false;
     numbersOfRotationDone = 0;  
-    writeConfigToSPIFFS();
   }  
   screenSaverTriggered = false;
   sendPowerState();
   sendMotorPowerState();
   return true;
+
 }
 
-bool processCmndSettings(char* message) {
-  StaticJsonDocument<BUFFER_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, message);
-  if (error) {
-    Serial.println(F("parseObject() failed 2"));
-    return false;
-  }
-  if (doc.containsKey("orientation")) {
-    String orientationConst = doc["orientation"];
-    orientation = orientationConst;
+bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
+
+  if (json.containsKey("orientation")) {
+    String orientation = helper.getValue(json["orientation"]);
 
     if (orientation == ORARIO) {
       anticlockwise = true;
@@ -362,114 +340,125 @@ bool processCmndSettings(char* message) {
       } 
     #endif 
 
-    int rotationSpeedConst = doc["rotation_speed"];
+    int rotationSpeedConst = json["rotation_speed"];
     steptime = rotationSpeedConst;
-    int rotationNumberConst = doc["rotation_number"];
+    int rotationNumberConst = json["rotation_number"];
     rotationNumber = rotationNumberConst;   
-    String keepItWoundConst = doc["keep_it_wound"];
-    keepItWound = keepItWoundConst;    
+    keepItWound = helper.getValue(json["keep_it_wound"]);
   }
   drawOrShutDownDisplay();
   return true;
+
 }
 
-bool processRebootCmnd(char* message) {
-  String rebootState = message;
+bool processRebootCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+
+  rebootState = helper.isOnOff(json);
   sendRebootState(OFF_CMD);
   if (rebootState == OFF_CMD) {      
     sendRebootCmnd();
   }
   return true;
+
 }
 
-bool processShowLastPageCmnd(char* message) {
-  if(strcmp(message, ON_CMD) == 0) {
+bool processShowLastPageCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+
+  String message = helper.isOnOff(json);
+  if (message == ON_CMD) {
     showLastPage = true;
     stateOn = true;
     sendMotorPowerState();
     sendPowerState();
-  } else if(strcmp(message, OFF_CMD) == 0) {
+  } else if(message == OFF_CMD) {
     showLastPage = false;
   } 
   return true;
+
 }
 
 /********************************** SEND STATE *****************************************/
 void sendPowerState() {
+
   drawOrShutDownDisplay();
-  mqttClient.publish(WATCHWINDER_STATE_TOPIC, (stateOn) ? ON_CMD : OFF_CMD, true);
+  bootstrapManager.publish(WATCHWINDER_STATE_TOPIC, (stateOn) ? helper.string2char(ON_CMD) : helper.string2char(OFF_CMD), true);
+
 }
 
 void sendMotorPowerState() {
-  mqttClient.publish(WATCHWINDER_STAT_POWER, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
+
+  bootstrapManager.publish(WATCHWINDER_STAT_POWER, (stepperMotorOn) ? helper.string2char(ON_CMD) : helper.string2char(OFF_CMD), true);
+
 }
 
 void sendPowerStateCmnd() {
-  mqttClient.publish(WATCHWINDER_CMND_TOPIC, (stateOn) ? ON_CMD : OFF_CMD, true);
+
+  bootstrapManager.publish(WATCHWINDER_CMND_TOPIC, (stateOn) ? helper.string2char(ON_CMD) : helper.string2char(OFF_CMD), true);
+
 }
 
 void sendMotorPowerStateCmnd() {
-  mqttClient.publish(WATCHWINDER_CMND_POWER, (stepperMotorOn) ? ON_CMD : OFF_CMD, true);
+
+  bootstrapManager.publish(WATCHWINDER_CMND_POWER, (stepperMotorOn) ? helper.string2char(ON_CMD) : helper.string2char(OFF_CMD), true);
+
 }
 
 void sendInfoState() {
-  StaticJsonDocument<BUFFER_SIZE> doc;
 
-  JsonObject root = doc.to<JsonObject>();
-
-  root["Whoami"] = WIFI_DEVICE_NAME;
-  root["IP"] = WiFi.localIP().toString();
-  root["MAC"] = WiFi.macAddress();
-  root["ver"] = VERSION;
-
+  JsonObject root = bootstrapManager.getJsonObject();
   root["State"] = (stateOn) ? ON_CMD : OFF_CMD;
-  root["Time"] = timedate;
   root["rotation_done"] = numbersOfRotationDone;
 
-  char buffer[measureJson(root) + 1];
-  serializeJson(root, buffer, sizeof(buffer));
+  bootstrapManager.sendState(WATCHWINDER_INFO_TOPIC, root, VERSION); 
 
-  // publish state only if it has received time from HA
-  if (timedate != OFF_CMD) {
-    mqttClient.publish(WATCHWINDER_INFO_TOPIC, buffer, true);
-  }
 }
 
-void sendRebootState(const char* onOff) {   
-  mqttClient.publish(WATCHWINDER_STAT_REBOOT, onOff, true);
+void sendRebootState(String onOff) {   
+
+  bootstrapManager.publish(WATCHWINDER_STAT_REBOOT, helper.string2char(onOff), true);
+
 }
 
-void sendRebootCmnd() {   
+void sendRebootCmnd() {  
+
   delay(DELAY_10);
   ESP.restart();
+
 }
 
 void writeStep(int outArray[4]) {
+
   digitalWrite(IN1, outArray[0]);
   digitalWrite(IN2, outArray[1]);
   digitalWrite(IN3, outArray[2]);
   digitalWrite(IN4, outArray[3]);
+
 }
 
 void stepper() {
+
   if ((Step >= 0) && (Step < 8)) {
     writeStep(stepsMatrix[Step]);
   } else {
     writeStep(arrayDefault);
   }
   setDirection();
+
 }
 
 void setDirection() {
+
   (anticlockwise == true) ? (Step++) : (Step--);
   if (Step > 7) {
     Step = 0;
   } else if (Step < 0) {
     Step = 7;
+
   }
 }
 
 void stepperMotorManager() {
+
   if (stepsLeft > 0) {
     moving = true;
     if (stepsLeft == NBSTEPS) {
@@ -487,37 +476,45 @@ void stepperMotorManager() {
     drawOrShutDownDisplay();
     stepsLeft = -1;
   }
+
 }
 
 // Send status to MQTT broker every ten seconds
 void delayAndSendStatus() {
+
   if(millis() > timeNowStatus + tenSecondsPeriod){
     timeNowStatus = millis();
     ledTriggered = true;
     sendPowerState();
     sendInfoState();
   }
+
 }
 
 // Trigger screensaver evert 5 minutes
 void triggerScreenSaverAfterFiveMinutes() {
+
   if(millis() > timeNowGoHomeAfterFiveMinutes + fiveMinutesPeriod) {
     timeNowGoHomeAfterFiveMinutes = millis();
     screenSaverTriggered = true;    
   }
+
 }
 
 // Go to home page after five minutes of inactivity and write SPIFFS
 void writeConfigToSPIFFSAfterMinute() {
+
   if(millis() > timeNowWriteSpiffsMinute + delay_1_minute) {
     timeNowWriteSpiffsMinute = millis();
     // Write data to file system
     writeConfigToSPIFFS();
   }
+
 }
 
 // Manage Stepper Motor every seconds
 void manageStepperMotorEverySeconds() {
+
   // ((NBSTEPS * steptime) / 1000) equals to the time spent for a complete rotation
   int millisecondsDelay = (((NBSTEPS * steptime) / 1000) + rotationDelayPeriord);
   if(millis() > timeNowManageStepperMotorAfterSeconds + millisecondsDelay) {
@@ -537,10 +534,12 @@ void manageStepperMotorEverySeconds() {
     stepsLeft = NBSTEPS;
     drawOrShutDownDisplay();
   }
+
 }
 
 /********************************** SPIFFS MANAGEMENT *****************************************/
 void readConfigFromSPIFFS() {
+
   bool error = false;
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -588,24 +587,27 @@ void readConfigFromSPIFFS() {
   if (!error) {
     delay(DELAY_10);
   }
+
 }
 
 void writeConfigToSPIFFS() {
-    if (SPIFFS.begin()) {
-      Serial.println(F("\nSaving config.json\n"));
-      DynamicJsonDocument doc(1024);
-      doc["numbersOfRotationDone"] = numbersOfRotationDone;     
-      // SPIFFS.format();
-      File configFile = SPIFFS.open("/config.json", "w");
-      if (!configFile) {
-        Serial.println(F("Failed to open config file for writing"));
-      }
-      serializeJsonPretty(doc, Serial);
-      serializeJson(doc, configFile);
-      configFile.close();
-    } else {
-      Serial.println(F("Failed to mount FS for write"));
-    }
+
+  if (SPIFFS.begin()) {
+    Serial.println(F("\nSaving config.json\n"));
+    DynamicJsonDocument doc(1024);
+    doc["numbersOfRotationDone"] = numbersOfRotationDone;     
+    // SPIFFS.format();
+    File configFile = SPIFFS.open("/config.json", "w");
+    if (!configFile) {
+      Serial.println(F("Failed to open config file for writing"));
+    } 
+    serializeJsonPretty(doc, Serial);
+    serializeJson(doc, configFile);
+    configFile.close();    
+  } else {
+    Serial.println(F("Failed to mount FS for write"));
+  }
+
 }
 
 /********************************** START MAIN LOOP *****************************************/

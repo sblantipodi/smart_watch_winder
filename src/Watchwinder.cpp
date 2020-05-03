@@ -345,6 +345,16 @@ bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
     int rotationNumberConst = json["rotation_number"];
     rotationNumber = rotationNumberConst;   
     keepItWound = helper.getValue(json["keep_it_wound"]);
+
+    int brightness = json["brightness"];
+    display.ssd1306_command(0x81);
+    display.ssd1306_command(brightness); //min 10 max 255
+    display.ssd1306_command(0xD9);
+    if (brightness <= 80) {        
+      display.ssd1306_command(17); 
+    } else {
+      display.ssd1306_command(34); 
+    }
   }
   drawOrShutDownDisplay();
   return true;

@@ -52,7 +52,7 @@ void setup() {
   // Bootsrap setup() with Wifi and MQTT functions
   bootstrapManager.bootstrapSetup(manageDisconnections, manageHardwareButton, callback);
 
-  readConfigFromSPIFFS();
+  readConfigFromStorage();
 
 }
 
@@ -511,13 +511,13 @@ void triggerScreenSaverAfterFiveMinutes() {
 
 }
 
-// Go to home page after five minutes of inactivity and write SPIFFS
-void writeConfigToSPIFFSAfterMinute() {
+// Go to home page after five minutes of inactivity and write to Storage
+void writeConfigToStorageAfterMinute() {
 
-  if(millis() > timeNowWriteSpiffsMinute + delay_1_minute) {
-    timeNowWriteSpiffsMinute = millis();
+  if(millis() > timeNowWriteStorageMinute + delay_1_minute) {
+    timeNowWriteStorageMinute = millis();
     // Write data to file system
-    writeConfigToSPIFFS();
+    writeConfigToStorage();
   }
 
 }
@@ -547,11 +547,11 @@ void manageStepperMotorEverySeconds() {
 
 }
 
-/********************************** SPIFFS MANAGEMENT *****************************************/
-void readConfigFromSPIFFS() {
+/********************************** LITTLE FS MANAGEMENT *****************************************/
+void readConfigFromStorage() {
   
   DynamicJsonDocument doc(1024);
-  doc = bootstrapManager.readSPIFFS(doc, "config.json");
+  doc = bootstrapManager.readLittleFS("config.json");
 
   if (!(doc.containsKey(VALUE) && doc[VALUE] == ERROR)) {
     Serial.println(F("\nReload previously stored values."));
@@ -560,11 +560,11 @@ void readConfigFromSPIFFS() {
 
 }
 
-void writeConfigToSPIFFS() {
+void writeConfigToStorage() {
 
   DynamicJsonDocument doc(1024);
   doc["numbersOfRotationDone"] = numbersOfRotationDone;     
-  bootstrapManager.writeToSPIFFS(doc, "config.json");      
+  bootstrapManager.writeToLittleFS(doc, "config.json");      
 
 }
 
@@ -583,7 +583,7 @@ void loop() {
   
   // Write SPIFFS every minute, saves the numbers of rotation.
   if (stepperMotorOn == true) {
-    writeConfigToSPIFFSAfterMinute();
+    writeConfigToStorageAfterMinute();
   }
 
   // Shut down stepper motor if numbers of daily rotation has been reached
@@ -599,7 +599,7 @@ void loop() {
     sendPowerState();
     sendPowerStateCmnd();
     sendMotorPowerStateCmnd();
-    writeConfigToSPIFFS();
+    writeConfigToStorage();
   } else if (showLastPage) {
     drawOrShutDownDisplay();
   }

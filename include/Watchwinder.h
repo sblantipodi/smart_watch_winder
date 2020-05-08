@@ -153,7 +153,7 @@ const int tenSecondsPeriod = 10000;
 unsigned long timeNowStatus = 0;
 const int fiveMinutesPeriod = 300000;
 unsigned long timeNowGoHomeAfterFiveMinutes = 0;
-unsigned long timeNowWriteSpiffsMinute = 0;
+unsigned long timeNowWriteStorageMinute = 0;
 unsigned long timeNowManageStepperMotorAfterSeconds = 0;
 
 // 'counter (3)', 44x44px
@@ -332,8 +332,8 @@ void drawRoundRect();
 void drawCenterScreenLogo(bool &triggerBool, const unsigned char *logo, const int logoW, const int logoH, const int delayInt);
 void sendPowerState();
 void sendMotorPowerState();
-void readConfigFromSPIFFS();
-void writeConfigToSPIFFS();
+void readConfigFromStorage();
+void writeConfigToStorage();
 void sendRebootState(String onOff);
 void sendRebootCmnd();
 bool processRebootCmnd(StaticJsonDocument<BUFFER_SIZE> json);
@@ -343,7 +343,7 @@ void stepper();
 void setDirection();
 void stepperMotorManager();
 void triggerScreenSaverAfterFiveMinutes();
-void writeConfigToSPIFFSAfterMinute();
+void writeConfigToStorageAfterMinute();
 void manageStepperMotorEverySeconds();
 void draw();
 void drawOrShutDownDisplay();

@@ -23,6 +23,11 @@ jobs:
       run: |     
         sed -i 's,^lib_extra_dirs =.*$,lib_extra_dirs = /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/arduino_bootstrapper,' platformio.ini
         cat platformio.ini
+    - name: Setup template config files
+      run: |                
+        cp /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h.template /home/runner/work/smart_watch_winder/smart_watch_winder/include/Secrets.h
+        cp /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h.template /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h   
+        cp /home/runner/work/smart_watch_winder/smart_watch_winder/include/Configuration.h /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Configuration.h  
     - name: Run PlatformIO (watchwinder_1)
       run: platformio run -e watchwinder_1
     - name: Creating watchwinder_1 artifact from BIN file 

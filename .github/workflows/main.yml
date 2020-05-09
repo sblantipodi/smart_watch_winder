@@ -28,6 +28,8 @@ jobs:
         cp /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h.template /home/runner/work/smart_watch_winder/smart_watch_winder/include/Secrets.h
         cp /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h.template /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Secrets.h   
         cp /home/runner/work/smart_watch_winder/smart_watch_winder/include/Configuration.h /home/runner/work/smart_watch_winder/smart_watch_winder/arduino_bootstrapper/include/Configuration.h  
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v2          
     - name: Run PlatformIO (watchwinder_1)
       run: platformio run -e watchwinder_1
     - name: Creating watchwinder_1 artifact from BIN file 

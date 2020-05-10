@@ -325,7 +325,7 @@ bool processCmndPower(StaticJsonDocument<BUFFER_SIZE> json) {
 bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
 
   if (json.containsKey("orientation")) {
-    String orientation = helper.getValue(json["orientation"]);
+    orientation = helper.getValue(json["orientation"]);
 
     if (orientation == ORARIO) {
       anticlockwise = true;

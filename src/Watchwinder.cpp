@@ -351,7 +351,7 @@ bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
     display.ssd1306_command(brightness); //min 10 max 255
     display.ssd1306_command(0xD9);
     if (brightness <= 80) {        
-      display.ssd1306_command(17); 
+      display.ssd1306_command(31); 
     } else {
       display.ssd1306_command(34); 
     }

@@ -31,27 +31,27 @@ sensor:
   - platform: mqtt
     state_topic: 'stat/watchwinder_1/INFO'
     name: 'Last Seen Watchwinder 1'
-    value_template: '{{ value_json.Time }}'
+    value_template: '{{ value_json.time }}'
   - platform: mqtt
     state_topic: 'stat/watchwinder_2/INFO'
     name: 'Last Seen Watchwinder 2'
-    value_template: '{{ value_json.Time }}'
+    value_template: '{{ value_json.time }}'
   - platform: mqtt
     state_topic: 'stat/watchwinder_3/INFO'
     name: 'Last Seen Watchwinder 3'
-    value_template: '{{ value_json.Time }}'
+    value_template: '{{ value_json.time }}'
   - platform: mqtt
     state_topic: 'stat/watchwinder_4/INFO'
     name: 'Last Seen Watchwinder 4'
-    value_template: '{{ value_json.Time }}'
+    value_template: '{{ value_json.time }}'
   - platform: mqtt
     state_topic: 'stat/watchwinder_5/INFO'
     name: 'Last Seen Watchwinder 5'
-    value_template: '{{ value_json.Time }}'
+    value_template: '{{ value_json.time }}'
   - platform: mqtt
     state_topic: 'stat/watchwinder_6/INFO'
     name: 'Last Seen Watchwinder 6'
-    value_template: '{{ value_json.Time }}' 
+    value_template: '{{ value_json.time }}' 
 
   - platform: mqtt
     state_topic: 'stat/watchwinder_1/INFO'
@@ -226,7 +226,7 @@ input_number:
     step: 100
   rotation_number_3:
     name: Numero rotazioni giornaliere 3
-    initial: 900
+    initial: 700
     min: 50
     max: 900
     step: 50
@@ -238,7 +238,7 @@ input_number:
     step: 100
   rotation_number_4:
     name: Numero rotazioni giornaliere 4
-    initial: 700
+    initial: 900
     min: 50
     max: 900
     step: 50
@@ -265,7 +265,13 @@ input_number:
     initial: 700
     min: 50
     max: 900
-    step: 50    
+    step: 50
+  watchwinder_display_brightness:
+    name: Display Brightness
+    initial: 160
+    min: 10
+    max: 255
+    step: 5      
     
 switch:
   - platform: mqtt
@@ -486,7 +492,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_1/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia1.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_1.state}}","rotation_speed":"{{states.input_number.roration_speed_1.state}}","rotation_number":"{{states.input_number.rotation_number_1.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia1.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_1.state}}","rotation_speed":"{{states.input_number.roration_speed_1.state}}","rotation_number":"{{states.input_number.rotation_number_1.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1548796542060'
     alias: watchwinder_settings_2
     trigger:
@@ -506,7 +512,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_2/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia2.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_2.state}}","rotation_speed":"{{states.input_number.roration_speed_2.state}}","rotation_number":"{{states.input_number.rotation_number_2.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia2.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_2.state}}","rotation_speed":"{{states.input_number.roration_speed_2.state}}","rotation_number":"{{states.input_number.rotation_number_2.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1548796542061'
     alias: watchwinder_settings_3
     trigger:
@@ -526,7 +532,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_3/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia3.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_3.state}}","rotation_speed":"{{states.input_number.roration_speed_3.state}}","rotation_number":"{{states.input_number.rotation_number_3.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia3.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_3.state}}","rotation_speed":"{{states.input_number.roration_speed_3.state}}","rotation_number":"{{states.input_number.rotation_number_3.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1548796542062'
     alias: watchwinder_settings_4
     trigger:
@@ -546,7 +552,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_4/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia4.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_4.state}}","rotation_speed":"{{states.input_number.roration_speed_4.state}}","rotation_number":"{{states.input_number.rotation_number_4.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia4.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_4.state}}","rotation_speed":"{{states.input_number.roration_speed_4.state}}","rotation_number":"{{states.input_number.rotation_number_4.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1548796542063'
     alias: watchwinder_settings_5
     trigger:
@@ -566,7 +572,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_5/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia5.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_5.state}}","rotation_speed":"{{states.input_number.roration_speed_5.state}}","rotation_number":"{{states.input_number.rotation_number_5.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia5.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_5.state}}","rotation_speed":"{{states.input_number.roration_speed_5.state}}","rotation_number":"{{states.input_number.rotation_number_5.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1548796542064'
     alias: watchwinder_settings_6
     trigger:
@@ -586,7 +592,7 @@ automation:
       data_template:
         topic: "cmnd/watchwinder_6/SETTINGS"
         retain: "false"
-        payload: '{"orientation":"{{states.input_select.marcia6.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_6.state}}","rotation_speed":"{{states.input_number.roration_speed_6.state}}","rotation_number":"{{states.input_number.rotation_number_6.state}}"}'
+        payload: '{"orientation":"{{states.input_select.marcia6.state}}","keep_it_wound":"{{states.input_boolean.keep_it_wound_6.state}}","rotation_speed":"{{states.input_number.roration_speed_6.state}}","rotation_number":"{{states.input_number.rotation_number_6.state}}","brightness":"{{states.input_number.watchwinder_display_brightness.state}}"}'
   - id: '1566422132712'
     alias: Mantieni Carico 1
     trigger:

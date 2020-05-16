@@ -123,7 +123,7 @@ void draw() {
     bootstrapManager.drawInfoPage(VERSION, AUTHOR);
   } else {
     
-    bootstrapManager.drawScreenSaver(AUTHOR + " domotics");
+    bootstrapManager.drawScreenSaver("DPsoftware domotics");
 
     if (showHaSplashScreen) {
       drawCenterScreenLogo(showHaSplashScreen, HABIGLOGO, HABIGLOGOW, HABIGLOGOH, DELAY_10);

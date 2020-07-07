@@ -144,7 +144,7 @@ bool moving = false;
 
 // Total Number of pages
 const int numPages = 2;
-const int delay_1_minute = 60000;
+const int delay_5_minute = 300000;
 int currentPage = 0;
 int offset = 160;
 unsigned long currentMicros;

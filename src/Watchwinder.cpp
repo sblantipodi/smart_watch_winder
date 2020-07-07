@@ -515,8 +515,11 @@ void triggerScreenSaverAfterFiveMinutes() {
 // Go to home page after five minutes of inactivity and write to Storage
 void writeConfigToStorageAfterMinute() {
 
-  if(millis() > timeNowWriteStorageMinute + delay_1_minute) {
+  if(millis() > timeNowWriteStorageMinute + delay_5_minute) {
     timeNowWriteStorageMinute = millis();
+    // Ping gateway to add presence on the routing table, 
+    // command is synchrounous and adds a bit of lag to the loop
+    Ping.ping(IP_DNS);
     // Write data to file system
     writeConfigToStorage();
   }

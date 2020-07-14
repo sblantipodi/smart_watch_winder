@@ -16,9 +16,83 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+          python --version
+
+      - name: Install submodules 
+        run: |        
+          git submodule update --init
+
+      - name: Setup template config files
+        run: |  
+          cp /home/runner/work/smart_watch_winder/smart_watch_winder/secrets.ini.template /home/runner/work/smart_watch_winder/smart_watch_winder/secrets.ini         
+       
+      - name: Static code analysis
+        run: platformio check --verbose --severity=high --skip-packages       
+
+      - name: Run PlatformIO (watchwinder_1)
+        run: platformio run -e watchwinder_1
+
+      - name: Save artifact (watchwinder_1)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_1/firmware.bin esp8266_firmware/WatchWinder_1_ESP8266_firmware.bin     
+
+      - name: Run PlatformIO (watchwinder_2)
+        run: platformio run -e watchwinder_2
+
+      - name: Save artifact (watchwinder_2)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_2/firmware.bin esp8266_firmware/WatchWinder_2_ESP8266_firmware.bin   
+
+      - name: Run PlatformIO (watchwinder_3)
+        run: platformio run -e watchwinder_3
+
+      - name: Save artifact (watchwinder_3)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_3/firmware.bin esp8266_firmware/WatchWinder_3_ESP8266_firmware.bin 
+
+      - name: Run PlatformIO (watchwinder_4)
+        run: platformio run -e watchwinder_4
+
+      - name: Save artifact (watchwinder_4)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_4/firmware.bin esp8266_firmware/WatchWinder_4_ESP8266_firmware.bin 
+
+      - name: Run PlatformIO (watchwinder_5)
+        run: platformio run -e watchwinder_5
+        
+      - name: Save artifact (watchwinder_5)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_5/firmware.bin esp8266_firmware/WatchWinder_5_ESP8266_firmware.bin 
+
+      - name: Run PlatformIO (watchwinder_6)
+        run: platformio run -e watchwinder_6
+
+      - name: Save artifact (watchwinder_6)
+        run: |        
+          mkdir esp8266_firmware;
+          cp .pio/build/watchwinder_6/firmware.bin esp8266_firmware/WatchWinder_6_ESP8266_firmware.bin 
+  
       - name: get commit message
         run: |
-           echo Commit MSG = $commitmsg             
+           echo Commit MSG = $commitmsg           
+
+      - name: Creating tar file
+        run: |        
+          tar cf esp8266_firmware.tar esp8266_firmware
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -32,3 +106,14 @@ jobs:
             ${{ env.commitmsg }}
           draft: false
           prerelease: false        
+
+      - name: Upload Release Asset (watchwinder)
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: esp8266_firmware.tar
+          asset_name: WatchWinder_esp8266_firmware.tar
+          asset_content_type: application/octet-stream                  

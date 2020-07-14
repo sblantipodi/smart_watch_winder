@@ -50,7 +50,6 @@ jobs:
 
       - name: Save artifact (watchwinder_2)
         run: |        
-          mkdir esp8266_firmware;
           cp .pio/build/watchwinder_2/firmware.bin esp8266_firmware/WatchWinder_2_ESP8266_firmware.bin   
 
       - name: Run PlatformIO (watchwinder_3)
@@ -58,7 +57,6 @@ jobs:
 
       - name: Save artifact (watchwinder_3)
         run: |        
-          mkdir esp8266_firmware;
           cp .pio/build/watchwinder_3/firmware.bin esp8266_firmware/WatchWinder_3_ESP8266_firmware.bin 
 
       - name: Run PlatformIO (watchwinder_4)
@@ -66,7 +64,6 @@ jobs:
 
       - name: Save artifact (watchwinder_4)
         run: |        
-          mkdir esp8266_firmware;
           cp .pio/build/watchwinder_4/firmware.bin esp8266_firmware/WatchWinder_4_ESP8266_firmware.bin 
 
       - name: Run PlatformIO (watchwinder_5)
@@ -74,7 +71,6 @@ jobs:
         
       - name: Save artifact (watchwinder_5)
         run: |        
-          mkdir esp8266_firmware;
           cp .pio/build/watchwinder_5/firmware.bin esp8266_firmware/WatchWinder_5_ESP8266_firmware.bin 
 
       - name: Run PlatformIO (watchwinder_6)
@@ -82,7 +78,6 @@ jobs:
 
       - name: Save artifact (watchwinder_6)
         run: |        
-          mkdir esp8266_firmware;
           cp .pio/build/watchwinder_6/firmware.bin esp8266_firmware/WatchWinder_6_ESP8266_firmware.bin 
   
       - name: get commit message

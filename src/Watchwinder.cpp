@@ -419,8 +419,7 @@ void sendInfoState() {
   root["State"] = (stateOn) ? ON_CMD : OFF_CMD;
   root["rotation_done"] = numbersOfRotationDone;
 
-  Ping.ping(IP_DNS);
-  bootstrapManager.sendState(WATCHWINDER_INFO_TOPIC, root, VERSION); 
+  bootstrapManager.sendState(WATCHWINDER_INFO_TOPIC, root, VERSION);
 
 }
 

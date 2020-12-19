@@ -9,6 +9,7 @@
 #include <ArduinoJson/Polyfills/attributes.hpp>
 #include <ArduinoJson/Polyfills/type_traits.hpp>
 #include <ArduinoJson/Variant/VariantAs.hpp>
+#include <ArduinoJson/Variant/VariantTag.hpp>
 
 namespace ARDUINOJSON_NAMESPACE {
 
@@ -17,23 +18,31 @@ CompareResult compare(const T1 &lhs, const T2 &rhs);  // VariantCompare.cpp
 
 template <typename TVariant>
 struct VariantOperators {
-  // Returns the default value if the VariantRef is undefined of incompatible
+  // Returns the default value if the VariantRef is undefined or incompatible
+  //
+  // int operator|(JsonVariant, int)
+  // float operator|(JsonVariant, float)
+  // bool operator|(JsonVariant, bool)
+  // const char* operator|(JsonVariant, const char*)
+  // char* operator|(JsonVariant, const char*)
   template <typename T>
-  friend typename enable_if<!IsVisitable<T>::value, T>::type operator|(
-      const TVariant &variant, const T &defaultValue) {
+  friend typename enable_if<!IsVariant<T>::value,
+                            typename VariantAs<T>::type>::type
+  operator|(const TVariant &variant, T defaultValue) {
     if (variant.template is<T>())
       return variant.template as<T>();
     else
       return defaultValue;
   }
-
-  // Returns the default value if the VariantRef is undefined of incompatible
-  // Special case for string: null is treated as undefined
+  //
+  // JsonVariant operator|(JsonVariant, JsonVariant)
   template <typename T>
-  friend typename enable_if<is_same<T, const char *>::value, T>::type operator|(
-      const TVariant &variant, T defaultValue) {
-    const char *value = variant.template as<const char *>();
-    return value ? value : defaultValue;
+  friend typename enable_if<IsVariant<T>::value, typename T::variant_type>::type
+  operator|(const TVariant &variant, T defaultValue) {
+    if (variant)
+      return variant;
+    else
+      return defaultValue;
   }
 
   // value == TVariant

@@ -1,6 +1,17 @@
 ArduinoJson: change log
 =======================
 
+v6.18.3 (2021-07-27)
+-------
+
+* Changed return type of `convertToJson()` and `Converter<T>::toJson()` to `void`
+* Added `as<std::string_view>()` and `is<std::string_view>()`
+
+v6.18.2 (2021-07-19)
+-------
+
+* Removed a symlink because the Arduino Library Specification forbids it
+
 v6.18.1 (2021-07-03)
 -------
 

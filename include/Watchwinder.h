@@ -31,12 +31,13 @@
 #include "Version.h"
 #include "Configuration.h"
 #include "BootstrapManager.h"
-#include <ESP8266Ping.h>
+#include <PingESP.h>
 
 
 /****************** BOOTSTRAP and WIFI MANAGER ******************/
 BootstrapManager bootstrapManager;
 Helpers helper;
+PingESP pingESP;
 
 /**************************** PIN DEFINITIONS **************************************************/
 // Initialize the display
@@ -159,6 +160,7 @@ const int fiveMinutesPeriod = 300000;
 unsigned long timeNowGoHomeAfterFiveMinutes = 0;
 unsigned long timeNowWriteStorageMinute = 0;
 unsigned long timeNowManageStepperMotorAfterSeconds = 0;
+unsigned long timeNowPingAfterSeconds = 0;
 
 // 'counter (3)', 44x44px
 const unsigned char counterLogo [] PROGMEM = {

@@ -61,7 +61,7 @@ void manageDisconnections() {
   
   // shut down stepper motor if wifi disconnects
   stepperMotorOn = false;
-  writeStep(arrayDefault);       
+  writeStep(arrayDefault);
 
 }
 
@@ -516,9 +516,7 @@ void writeConfigToStorageAfterMinute() {
 
   if(millis() > timeNowWriteStorageMinute + delay_5_minute) {
     timeNowWriteStorageMinute = millis();
-    // Ping gateway to add presence on the routing table, 
-    // command is synchrounous and adds a bit of lag to the loop
-    Ping.ping(IP_DNS, 1);
+    pingESP.ping(WiFi.gatewayIP());
     // Write data to file system
     writeConfigToStorage();
   }
@@ -587,6 +585,11 @@ void loop() {
   // Write SPIFFS every minute, saves the numbers of rotation.
   if (stepperMotorOn == true) {
     writeConfigToStorageAfterMinute();
+  } else {
+    if(millis() > timeNowPingAfterSeconds + fiveMinutesPeriod) {
+      timeNowPingAfterSeconds = millis();
+      pingESP.ping(WiFi.gatewayIP());
+    }
   }
 
   // Shut down stepper motor if numbers of daily rotation has been reached

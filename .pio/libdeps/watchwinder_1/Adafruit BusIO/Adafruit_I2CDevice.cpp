@@ -1,5 +1,4 @@
-#include <Adafruit_I2CDevice.h>
-#include <Arduino.h>
+#include "Adafruit_I2CDevice.h"
 
 //#define DEBUG_SERIAL Serial
 
@@ -34,6 +33,23 @@ bool Adafruit_I2CDevice::begin(bool addr_detect) {
     return detected();
   }
   return true;
+}
+
+/*!
+ *    @brief  De-initialize device, turn off the Wire interface
+ */
+void Adafruit_I2CDevice::end(void) {
+  // Not all port implement Wire::end(), such as
+  // - ESP8266
+  // - AVR core without WIRE_HAS_END
+  // - ESP32: end() is implemented since 2.0.1 which is latest at the moment.
+  // Temporarily disable for now to give time for user to update.
+#if !(defined(ESP8266) ||                                                      \
+      (defined(ARDUINO_ARCH_AVR) && !defined(WIRE_HAS_END)) ||                 \
+      defined(ARDUINO_ARCH_ESP32))
+  _wire->end();
+  _begun = false;
+#endif
 }
 
 /*!
@@ -127,22 +143,21 @@ bool Adafruit_I2CDevice::write(const uint8_t *buffer, size_t len, bool stop,
       DEBUG_SERIAL.println();
     }
   }
-  DEBUG_SERIAL.println();
-#endif
 
-#ifdef DEBUG_SERIAL
-  DEBUG_SERIAL.print("Stop: ");
-  DEBUG_SERIAL.println(stop);
+  if (stop) {
+    DEBUG_SERIAL.print("\tSTOP");
+  }
 #endif
 
   if (_wire->endTransmission(stop) == 0) {
 #ifdef DEBUG_SERIAL
+    DEBUG_SERIAL.println();
     // DEBUG_SERIAL.println("Sent!");
 #endif
     return true;
   } else {
 #ifdef DEBUG_SERIAL
-    DEBUG_SERIAL.println("Failed to send!");
+    DEBUG_SERIAL.println("\tFailed to send!");
 #endif
     return false;
   }

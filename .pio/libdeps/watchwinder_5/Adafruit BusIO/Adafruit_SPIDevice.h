@@ -1,12 +1,12 @@
+#ifndef Adafruit_SPIDevice_h
+#define Adafruit_SPIDevice_h
+
 #include <Arduino.h>
 
 #if !defined(SPI_INTERFACES_COUNT) ||                                          \
     (defined(SPI_INTERFACES_COUNT) && (SPI_INTERFACES_COUNT > 0))
 
 #include <SPI.h>
-
-#ifndef Adafruit_SPIDevice_h
-#define Adafruit_SPIDevice_h
 
 // some modern SPI definitions don't have BitOrder enum
 #if (defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)) ||                    \
@@ -82,6 +82,7 @@ public:
   bool write_then_read(uint8_t *write_buffer, size_t write_len,
                        uint8_t *read_buffer, size_t read_len,
                        uint8_t sendvalue = 0xFF);
+  bool write_and_read(uint8_t *buffer, size_t len);
 
   uint8_t transfer(uint8_t send);
   void transfer(uint8_t *buffer, size_t len);
@@ -94,6 +95,7 @@ private:
   uint32_t _freq;
   BusIOBitOrder _dataOrder;
   uint8_t _dataMode;
+  void setChipSelect(int value);
 
   int8_t _cs, _sck, _mosi, _miso;
 #ifdef BUSIO_USE_FAST_PINIO
@@ -103,5 +105,5 @@ private:
   bool _begun;
 };
 
-#endif // Adafruit_SPIDevice_h
 #endif // has SPI defined
+#endif // Adafruit_SPIDevice_h

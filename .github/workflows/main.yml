@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -29,42 +31,42 @@ jobs:
     - name: Run PlatformIO (watchwinder_1)
       run: platformio run -e watchwinder_1
     - name: Creating watchwinder_1 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_1.bin
         path: .pio/build/watchwinder_1/firmware.bin
     - name: Run PlatformIO (watchwinder_2)
       run: platformio run -e watchwinder_2
     - name: Creating watchwinder_2 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_2.bin
         path: .pio/build/watchwinder_2/firmware.bin
     - name: Run PlatformIO (watchwinder_3)
       run: platformio run -e watchwinder_3
     - name: Creating watchwinder_3 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_3.bin
         path: .pio/build/watchwinder_3/firmware.bin      
     - name: Run PlatformIO (watchwinder_4)
       run: platformio run -e watchwinder_4
     - name: Creating watchwinder_4 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_4.bin
         path: .pio/build/watchwinder_4/firmware.bin
     - name: Run PlatformIO (watchwinder_5)
       run: platformio run -e watchwinder_5
     - name: Creating watchwinder_5 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_5.bin
         path: .pio/build/watchwinder_5/firmware.bin
     - name: Run PlatformIO (watchwinder_6)
       run: platformio run -e watchwinder_6
     - name: Creating watchwinder_6 artifact from BIN file 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: firmware_build_artifact_watchwinder_6.bin
         path: .pio/build/watchwinder_6/firmware.bin

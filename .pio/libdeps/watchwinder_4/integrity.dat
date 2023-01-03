@@ -1,5 +1,5 @@
-Adafruit SSD1306
-Adafruit GFX Library
-PubSubClient
-Adafruit BusIO
-ArduinoJson
+bblanchon/ArduinoJson
+adafruit/Adafruit BusIO
+adafruit/Adafruit SSD1306
+knolleary/PubSubClient
+adafruit/Adafruit GFX Library

@@ -519,7 +519,7 @@ void writeConfigToStorageAfterMinute() {
 
   if(millis() > timeNowWriteStorageMinute + delay_5_minute) {
     timeNowWriteStorageMinute = millis();
-    pingESP.ping(WiFi.gatewayIP());
+    pingESP.ping();
     // Write data to file system
     writeConfigToStorage();
   }
@@ -594,8 +594,7 @@ void loop() {
   } else {
     if(millis() > timeNowPingAfterSeconds + fiveMinutesPeriod) {
       timeNowPingAfterSeconds = millis();
-      pingESP.ping(WiFi.gatewayIP());
-    }
+      pingESP.ping();    }
   }
   ESP.wdtFeed();
 

@@ -102,7 +102,7 @@ jobs:
             Changes in this Release
             ${{ env.commitmsg }}
           files: WatchWinder_esp8266_firmware.tar
-          draft: true
+          draft: false
           prerelease: false
 
       - name: upload windows artifact

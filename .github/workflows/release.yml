@@ -101,7 +101,6 @@ jobs:
           body: |
             Changes in this Release
             ${{ env.commitmsg }}
-          files: WatchWinder_esp8266_firmware.tar
           draft: false
           prerelease: false
 

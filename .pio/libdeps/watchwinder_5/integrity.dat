@@ -1,5 +1,5 @@
-bblanchon/ArduinoJson
-adafruit/Adafruit BusIO
-adafruit/Adafruit SSD1306
 knolleary/PubSubClient
+adafruit/Adafruit SSD1306
 adafruit/Adafruit GFX Library
+https://github.com/bblanchon/ArduinoJson.git#7.x
+adafruit/Adafruit BusIO

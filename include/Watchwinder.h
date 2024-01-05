@@ -1,7 +1,7 @@
 /*
   Watchwinder.cpp - Smart Watch Winder
   
-  Copyright © 2020 - 2023  Davide Perini
+  Copyright © 2020 - 2024  Davide Perini
   
   Permission is hereby granted, free of charge, to any person obtaining a copy of 
   this software and associated documentation files (the "Software"), to deal
@@ -330,10 +330,10 @@ void manageDisconnections();
 void manageQueueSubscription();
 void manageHardwareButton();
 // Project specific functions
-bool processSmartostatClimateJson(StaticJsonDocument<BUFFER_SIZE> json);
-bool processDisplayCmnd(StaticJsonDocument<BUFFER_SIZE> json);
-bool processCmndPower(StaticJsonDocument<BUFFER_SIZE> json);
-bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json);
+bool processSmartostatClimateJson(JsonDocument json);
+bool processDisplayCmnd(JsonDocument json);
+bool processCmndPower(JsonDocument json);
+bool processCmndSettings(JsonDocument json);
 void drawRoundRect();
 void drawCenterScreenLogo(bool &triggerBool, const unsigned char *logo, const int logoW, const int logoH, const int delayInt);
 void sendPowerState();
@@ -342,8 +342,8 @@ void readConfigFromStorage();
 void writeConfigToStorage();
 void sendRebootState(String onOff);
 void sendRebootCmnd();
-bool processRebootCmnd(StaticJsonDocument<BUFFER_SIZE> json);
-bool processShowLastPageCmnd(StaticJsonDocument<BUFFER_SIZE> json);
+bool processRebootCmnd(JsonDocument json);
+bool processShowLastPageCmnd(JsonDocument json);
 void writeStep(int outArray[4]);
 void stepper();
 void setDirection();

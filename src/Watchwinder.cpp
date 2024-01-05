@@ -1,7 +1,7 @@
 /*
   Watchwinder.cpp - Smart Watch Winder
   
-  Copyright © 2020 - 2023  Davide Perini
+  Copyright © 2020 - 2024  Davide Perini
   
   Permission is hereby granted, free of charge, to any person obtaining a copy of 
   this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,7 @@ void manageHardwareButton() {
 /********************************** START CALLBACK*****************************************/
 void callback(char* topic, byte* payload, unsigned int length) {
 
-  StaticJsonDocument<BUFFER_SIZE> json = bootstrapManager.parseQueueMsg(topic, payload, length);
+  JsonDocument json = bootstrapManager.parseQueueMsg(topic, payload, length);
 
   if(strcmp(topic, WATCHWINDER_CMND_REBOOT) == 0) {
     processRebootCmnd(json);
@@ -263,7 +263,7 @@ void drawRoundRect() {
 }
 
 /********************************** START PROCESS JSON*****************************************/
-bool processSmartostatClimateJson(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processSmartostatClimateJson(JsonDocument json) {
   
   if (json.containsKey("smartostat")) {
     String timeConst = json["Time"];
@@ -288,7 +288,7 @@ bool processSmartostatClimateJson(StaticJsonDocument<BUFFER_SIZE> json) {
 
 }
 
-bool processDisplayCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processDisplayCmnd(JsonDocument json) {
 
   String message = helper.isOnOff(json);
   if (message == ON_CMD) {
@@ -302,7 +302,7 @@ bool processDisplayCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
 
 }
 
-bool processCmndPower(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processCmndPower(JsonDocument json) {
 
   #ifdef TARGET_WATCHWINDER_3
     anticlockwise = true;
@@ -325,7 +325,7 @@ bool processCmndPower(StaticJsonDocument<BUFFER_SIZE> json) {
 
 }
 
-bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processCmndSettings(JsonDocument json) {
 
   if (json.containsKey("orientation")) {
     orientation = helper.getValue(json["orientation"]);
@@ -364,7 +364,7 @@ bool processCmndSettings(StaticJsonDocument<BUFFER_SIZE> json) {
 
 }
 
-bool processRebootCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processRebootCmnd(JsonDocument json) {
 
   rebootState = helper.isOnOff(json);
   sendRebootState(OFF_CMD);
@@ -375,7 +375,7 @@ bool processRebootCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
 
 }
 
-bool processShowLastPageCmnd(StaticJsonDocument<BUFFER_SIZE> json) {
+bool processShowLastPageCmnd(JsonDocument json) {
 
   String message = helper.isOnOff(json);
   if (message == ON_CMD) {
@@ -554,7 +554,7 @@ void manageStepperMotorEverySeconds() {
 /********************************** LITTLE FS MANAGEMENT *****************************************/
 void readConfigFromStorage() {
   
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc = bootstrapManager.readLittleFS("config.json");
 
   if (!(doc.containsKey(VALUE) && doc[VALUE] == ERROR)) {
@@ -566,7 +566,7 @@ void readConfigFromStorage() {
 
 void writeConfigToStorage() {
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["numbersOfRotationDone"] = numbersOfRotationDone;     
   bootstrapManager.writeToLittleFS(doc, "config.json");      
 

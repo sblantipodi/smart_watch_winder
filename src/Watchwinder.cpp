@@ -264,8 +264,8 @@ void drawRoundRect() {
 
 /********************************** START PROCESS JSON*****************************************/
 bool processSmartostatClimateJson(JsonDocument json) {
-  
-  if (json.containsKey("smartostat")) {
+
+  if (json["smartostat"].is<JsonVariant>()) {
     String timeConst = json["Time"];
     // On first boot the timedate variable is OFF
     if (timedate == OFF_CMD) {
@@ -327,7 +327,7 @@ bool processCmndPower(JsonDocument json) {
 
 bool processCmndSettings(JsonDocument json) {
 
-  if (json.containsKey("orientation")) {
+  if (json["orientation"].is<JsonVariant>()) {
     orientation = helper.getValue(json["orientation"]);
 
     if (orientation == ORARIO) {
@@ -556,8 +556,7 @@ void readConfigFromStorage() {
   
   JsonDocument doc;
   doc = bootstrapManager.readLittleFS("config.json");
-
-  if (!(doc.containsKey(VALUE) && doc[VALUE] == ERROR)) {
+  if (!(doc[VALUE].is<JsonVariant>() && doc[VALUE] == ERROR)) {
     Serial.println(F("\nReload previously stored values."));
     numbersOfRotationDone = doc["numbersOfRotationDone"]; 
   }

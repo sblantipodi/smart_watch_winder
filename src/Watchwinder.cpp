@@ -31,6 +31,7 @@
 void setup() {
 
   Serial.begin(SERIAL_RATE);
+  neopixelWrite(LED_BUILTIN, 0,0,0);
 
   // Stepper Motor PINS
   pinMode(IN1, OUTPUT);
@@ -46,16 +47,11 @@ void setup() {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-  ESP.wdtFeed();
-
   display.setTextColor(WHITE);
 
   // Bootsrap setup() with Wifi and MQTT functions
   bootstrapManager.bootstrapSetup(manageDisconnections, manageHardwareButton, callback);
-  ESP.wdtFeed();
-
   readConfigFromStorage();
-  ESP.wdtFeed();
 
 }
 
@@ -519,7 +515,6 @@ void writeConfigToStorageAfterMinute() {
 
   if(millis() > timeNowWriteStorageMinute + delay_5_minute) {
     timeNowWriteStorageMinute = millis();
-    pingESP.ping();
     // Write data to file system
     writeConfigToStorage();
   }
@@ -577,15 +572,12 @@ void loop() {
 
   // Bootsrap loop() with Wifi, MQTT and OTA functions
   bootstrapManager.bootstrapLoop(manageDisconnections, manageQueueSubscription, manageHardwareButton);
-  ESP.wdtFeed();
 
   // Send status on MQTT Broker every n seconds
   delayAndSendStatus();
-  ESP.wdtFeed();
 
   // Trigger screensaver every 5 minutes
   triggerScreenSaverAfterFiveMinutes();
-  ESP.wdtFeed();
 
   // Write SPIFFS every minute, saves the numbers of rotation.
   if (stepperMotorOn == true) {
@@ -593,9 +585,8 @@ void loop() {
   } else {
     if(millis() > timeNowPingAfterSeconds + fiveMinutesPeriod) {
       timeNowPingAfterSeconds = millis();
-      pingESP.ping();    }
+    }
   }
-  ESP.wdtFeed();
 
   // Shut down stepper motor if numbers of daily rotation has been reached
   if (numbersOfRotationDone > rotationNumber) {
@@ -614,7 +605,6 @@ void loop() {
   } else if (showLastPage) {
     drawOrShutDownDisplay();
   }
-  ESP.wdtFeed();
 
   // Manage Stepper Motor every two seconds
   if (stepperMotorOn) {
@@ -629,9 +619,7 @@ void loop() {
       display.display();
     }
   }
-  ESP.wdtFeed();
 
   bootstrapManager.nonBlokingBlink();
-  ESP.wdtFeed();
 
 }

@@ -37,17 +37,16 @@
 /****************** BOOTSTRAP and WIFI MANAGER ******************/
 BootstrapManager bootstrapManager;
 Helpers helper;
-PingESP pingESP;
 
 /**************************** PIN DEFINITIONS **************************************************/
 // Initialize the display
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); 
 
 #define OLED_RESET LED_BUILTIN // Pin used for integrated D1 Mini blue LED
-#define IN1 14 //GPIO 14 (D5)
-#define IN2 12 //GPIO 12 (D6)
-#define IN3 13 //GPIO 13 (D7)
-#define IN4 15 //GPIO 15 (D8)
+#define IN1 12 //GPIO 14 (D5)
+#define IN2 13 //GPIO 12 (D6)
+#define IN3 11 //GPIO 13 (D7)
+#define IN4 10 //GPIO 15 (D8)
 const int NBSTEPS = 4095;
 unsigned int steptime = 2500;
 int rotationNumber = 300;

@@ -31,6 +31,11 @@ inline bool VariantData::setString(TAdaptedString value,
     return true;
   }
 
+  if (isTinyString(value, value.size())) {
+    setTinyString(value);
+    return true;
+  }
+
   auto dup = resources->saveString(value);
   if (dup) {
     setOwnedString(dup);

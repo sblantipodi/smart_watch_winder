@@ -26,6 +26,15 @@
 #  endif
 #endif
 
+// Remove true and false macros defined by some cores, such as Arduino Due's
+// See issues #2181 and arduino/ArduinoCore-sam#50
+#ifdef true
+#  undef true
+#endif
+#ifdef false
+#  undef false
+#endif
+
 #include "ArduinoJson/Array/JsonArray.hpp"
 #include "ArduinoJson/Object/JsonObject.hpp"
 #include "ArduinoJson/Variant/JsonVariantConst.hpp"

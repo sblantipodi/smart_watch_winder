@@ -29,9 +29,10 @@
 
 /********************************** START SETUP*****************************************/
 void setup() {
-
+#if defined(ARDUINO_ARCH_ESP32)
+  rgbLedWrite(LED_BUILTIN, 0, 0, 255);
+#endif
   Serial.begin(SERIAL_RATE);
-  neopixelWrite(LED_BUILTIN, 0,0,0);
 
   // Stepper Motor PINS
   pinMode(IN1, OUTPUT);
@@ -48,11 +49,15 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
   display.setTextColor(WHITE);
-
+#if defined(ARDUINO_ARCH_ESP32)
+  rgbLedWrite(LED_BUILTIN, 0, 0, 255);
+#endif
   // Bootsrap setup() with Wifi and MQTT functions
   bootstrapManager.bootstrapSetup(manageDisconnections, manageHardwareButton, callback);
   readConfigFromStorage();
-
+#if defined(ARDUINO_ARCH_ESP32)
+  rgbLedWrite(LED_BUILTIN, 0, 0, 0);
+#endif
 }
 
 /********************************** MANAGE WIFI AND MQTT DISCONNECTION *****************************************/
@@ -620,6 +625,6 @@ void loop() {
     }
   }
 
-  bootstrapManager.nonBlokingBlink();
+  // bootstrapManager.nonBlokingBlink();
 
 }

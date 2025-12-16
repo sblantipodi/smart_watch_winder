@@ -39,9 +39,6 @@ BootstrapManager bootstrapManager;
 Helpers helper;
 
 /**************************** PIN DEFINITIONS **************************************************/
-// Initialize the display
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); 
-
 #define OLED_RESET LED_BUILTIN // Pin used for integrated D1 Mini blue LED
 #define IN1 12 //GPIO 14 (D5)
 #define IN2 13 //GPIO 12 (D6)

@@ -92,6 +92,7 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_1/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_1/DISPLAY_POWER";
   const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_1/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_1/hello";
 #endif
 #ifdef TARGET_WATCHWINDER_2
   const char* WATCHWINDER_CMND_POWER = "cmnd/watchwinder_2/POWER"; 
@@ -99,7 +100,8 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_SETTINGS = "cmnd/watchwinder_2/SETTINGS"; 
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_2/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_2/DISPLAY_POWER";
-  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_2/INFO"; 
+  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_2/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_2/hello";
 #endif 
 #ifdef TARGET_WATCHWINDER_3
   const char* WATCHWINDER_CMND_POWER = "cmnd/watchwinder_3/POWER"; 
@@ -107,7 +109,8 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_SETTINGS = "cmnd/watchwinder_3/SETTINGS"; 
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_3/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_3/DISPLAY_POWER";
-  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_3/INFO"; 
+  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_3/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_3/hello";
 #endif 
 #ifdef TARGET_WATCHWINDER_4
   const char* WATCHWINDER_CMND_POWER = "cmnd/watchwinder_4/POWER"; 
@@ -115,7 +118,8 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_SETTINGS = "cmnd/watchwinder_4/SETTINGS"; 
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_4/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_4/DISPLAY_POWER";
-  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_4/INFO"; 
+  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_4/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_4/hello";
 #endif 
 #ifdef TARGET_WATCHWINDER_5
   const char* WATCHWINDER_CMND_POWER = "cmnd/watchwinder_5/POWER"; 
@@ -123,7 +127,8 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_SETTINGS = "cmnd/watchwinder_5/SETTINGS"; 
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_5/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_5/DISPLAY_POWER";
-  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_5/INFO"; 
+  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_5/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_5/hello";
 #endif 
 #ifdef TARGET_WATCHWINDER_6
   const char* WATCHWINDER_CMND_POWER = "cmnd/watchwinder_6/POWER"; 
@@ -131,7 +136,8 @@ const char* WATCHWINDER_CMND_SHOWLASTPAGE = "cmnd/watchwinder/OLEDINFO";
   const char* WATCHWINDER_SETTINGS = "cmnd/watchwinder_6/SETTINGS"; 
   const char* WATCHWINDER_CMND_TOPIC = "cmnd/watchwinder_6/DISPLAY_POWER"; 
   const char* WATCHWINDER_STATE_TOPIC = "stat/watchwinder_6/DISPLAY_POWER";
-  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_6/INFO"; 
+  const char* WATCHWINDER_INFO_TOPIC = "stat/watchwinder_6/INFO";
+  const char* WATCHWINDER_HELLO_TOPIC = "stat/watchwinder_6/hello";
 #endif 
 
 // Display state

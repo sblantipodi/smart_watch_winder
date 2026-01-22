@@ -78,7 +78,8 @@ void manageQueueSubscription() {
   bootstrapManager.subscribe(WATCHWINDER_CMND_TOPIC);
   bootstrapManager.subscribe(WATCHWINDER_CMND_POWER);
   bootstrapManager.subscribe(WATCHWINDER_SETTINGS);
-  
+  BootstrapManager::publish(WATCHWINDER_HELLO_TOPIC, Helpers::string2char(F("HELLO")), true);
+
 }
 
 /********************************** MANAGE HARDWARE BUTTON *****************************************/

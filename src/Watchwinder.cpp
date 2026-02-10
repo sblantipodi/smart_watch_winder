@@ -53,6 +53,7 @@ void setup() {
   rgbLedWrite(LED_BUILTIN, 0, 0, 255);
 #endif
   // Bootsrap setup() with Wifi and MQTT functions
+  blockingMqtt = false;
   bootstrapManager.bootstrapSetup(manageDisconnections, manageHardwareButton, callback);
   readConfigFromStorage();
 #if defined(ARDUINO_ARCH_ESP32)
@@ -532,7 +533,7 @@ void manageStepperMotorEverySeconds() {
 
   // ((NBSTEPS * steptime) / 1000) equals to the time spent for a complete rotation
   int millisecondsDelay = (((NBSTEPS * steptime) / 1000) + rotationDelayPeriord);
-  if(millis() > timeNowManageStepperMotorAfterSeconds + millisecondsDelay) {
+  if(millis() > timeNowManageStepperMotorAfterSeconds + millisecondsDelay && (WiFi.status() == WL_CONNECTED && QueueManager::getMqttClient().connected())) {
     timeNowManageStepperMotorAfterSeconds = millis();
     currentMicros = 0;
     stepsLeft = NBSTEPS;
